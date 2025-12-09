@@ -10,6 +10,8 @@ import './widgets/ai_recommendations_section_widget.dart';
 import './widgets/quiet_hours_section_widget.dart';
 import './widgets/usage_warnings_section_widget.dart';
 import './widgets/vibe_alerts_section_widget.dart';
+import './widgets/font_size_section_widget.dart';
+import './widgets/notification_colors_section_widget.dart';
 
 /// Notification Settings screen for personalized alert configuration
 /// based on emotional states and usage patterns with granular control options
@@ -28,6 +30,12 @@ class _NotificationSettingsState extends State<NotificationSettings> {
   // Vibe-based alerts settings
   bool _vibeAlertsEnabled = true;
   double _vibeAlertThreshold = 0.7;
+
+  // Selected notification colors
+  Set<String> _selectedVibeColors = {'Zen', 'Energized', 'Reflective'};
+
+  // Font size preference
+  double _notificationFontSize = 14.0;
 
   // Usage warnings settings
   bool _doomScrollingDetection = true;
@@ -84,8 +92,32 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   onThresholdChanged: (value) {
                     setState(() => _vibeAlertThreshold = value);
                   },
-                  onPreviewTap: () =>
-                      _showNotificationPreview(context, 'Vibe Alert'),
+                  onPreviewTap:
+                      () => _showNotificationPreview(context, 'Vibe Alert'),
+                ),
+                SizedBox(height: 2.h),
+
+                // Notification Colors Section
+                NotificationColorsSectionWidget(
+                  selectedVibes: _selectedVibeColors,
+                  onVibeToggle: (vibeName) {
+                    setState(() {
+                      if (_selectedVibeColors.contains(vibeName)) {
+                        _selectedVibeColors.remove(vibeName);
+                      } else {
+                        _selectedVibeColors.add(vibeName);
+                      }
+                    });
+                  },
+                ),
+                SizedBox(height: 2.h),
+
+                // Font Size Section
+                FontSizeSectionWidget(
+                  fontSize: _notificationFontSize,
+                  onFontSizeChanged: (value) {
+                    setState(() => _notificationFontSize = value);
+                  },
                 ),
                 SizedBox(height: 2.h),
 
@@ -159,7 +191,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   onExpandToggle: () {
                     HapticFeedback.lightImpact();
                     setState(
-                        () => _showAdvancedSettings = !_showAdvancedSettings);
+                      () => _showAdvancedSettings = !_showAdvancedSettings,
+                    );
                   },
                   onSoundsToggle: (value) {
                     HapticFeedback.lightImpact();
@@ -202,18 +235,21 @@ class _NotificationSettingsState extends State<NotificationSettings> {
           Container(
             padding: EdgeInsets.all(2.w),
             decoration: BoxDecoration(
-              color: _notificationsEnabled
-                  ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              color:
+                  _notificationsEnabled
+                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: CustomIconWidget(
-              iconName: _notificationsEnabled
-                  ? 'notifications_active'
-                  : 'notifications_off',
-              color: _notificationsEnabled
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              iconName:
+                  _notificationsEnabled
+                      ? 'notifications_active'
+                      : 'notifications_off',
+              color:
+                  _notificationsEnabled
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
               size: 24,
             ),
           ),
@@ -254,9 +290,10 @@ class _NotificationSettingsState extends State<NotificationSettings> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _notificationsEnabled
-            ? () => _showNotificationPreview(context, 'Test Notification')
-            : null,
+        onPressed:
+            _notificationsEnabled
+                ? () => _showNotificationPreview(context, 'Test Notification')
+                : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
@@ -336,9 +373,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
         ),
         backgroundColor: theme.colorScheme.surface,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
           label: 'Dismiss',

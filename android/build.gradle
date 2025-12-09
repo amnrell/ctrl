@@ -1,3 +1,7 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+}
+
 allprojects {
     repositories {
         google()

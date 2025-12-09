@@ -67,17 +67,15 @@ class VibeAlertsSectionWidget extends StatelessWidget {
                       Text(
                         'Get notified when your vibe shifts',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Switch(
-                  value: isEnabled,
-                  onChanged: onToggle,
-                ),
+                Switch(value: isEnabled, onChanged: onToggle),
               ],
             ),
           ),
@@ -106,8 +104,9 @@ class VibeAlertsSectionWidget extends StatelessWidget {
                           vertical: 1.h,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              theme.colorScheme.primary.withValues(alpha: 0.1),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -124,11 +123,13 @@ class VibeAlertsSectionWidget extends StatelessWidget {
                   SliderTheme(
                     data: SliderThemeData(
                       activeTrackColor: theme.colorScheme.primary,
-                      inactiveTrackColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.2),
+                      inactiveTrackColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.2,
+                      ),
                       thumbColor: theme.colorScheme.primary,
-                      overlayColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.2),
+                      overlayColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.2,
+                      ),
                       trackHeight: 4,
                     ),
                     child: Slider(
@@ -146,15 +147,17 @@ class VibeAlertsSectionWidget extends StatelessWidget {
                       Text(
                         'Less Sensitive',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                       ),
                       Text(
                         'More Sensitive',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                       ),
                     ],
@@ -172,8 +175,9 @@ class VibeAlertsSectionWidget extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color:
-                              theme.colorScheme.primary.withValues(alpha: 0.3),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -207,59 +211,42 @@ class VibeAlertsSectionWidget extends StatelessWidget {
   }
 
   Widget _buildVibeColorExamples(ThemeData theme) {
-    final vibeColors = [
-      {'name': 'Zen', 'color': const Color(0xFF4A7C59)},
-      {'name': 'Energy', 'color': const Color(0xFFE8B86D)},
-      {'name': 'Reflection', 'color': const Color(0xFF6B73FF)},
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Notification Colors',
+          'Alert Sensitivity Preview',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             fontWeight: FontWeight.w500,
           ),
         ),
         SizedBox(height: 1.h),
-        Row(
-          children: vibeColors.map((vibe) {
-            return Expanded(
-              child: Container(
-                margin: EdgeInsets.only(right: 2.w),
-                padding: EdgeInsets.symmetric(vertical: 1.h),
-                decoration: BoxDecoration(
-                  color: (vibe['color'] as Color).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: (vibe['color'] as Color).withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 8.w,
-                      height: 8.w,
-                      decoration: BoxDecoration(
-                        color: vibe['color'] as Color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      vibe['name'] as String,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+        Container(
+          padding: EdgeInsets.all(3.w),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              CustomIconWidget(
+                iconName: 'notifications',
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: Text(
+                  'Vibe shift detected at ${(threshold * 100).toInt()}% threshold',
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp),
                 ),
               ),
-            );
-          }).toList(),
+            ],
+          ),
         ),
       ],
     );

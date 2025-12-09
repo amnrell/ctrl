@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +7,8 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 
-/// Splash Screen with advanced glitching CTRL text animation
-/// Features dynamic font changes, color shifts, and italic transformations
+/// Splash Screen with cyberpunk-style glitching CTRL text animation
+/// Features chromatic aberration, scan lines, blur effects, and dynamic color shifts
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -16,129 +17,76 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _glitchController;
   late Animation<double> _fadeAnimation;
 
-  // Enhanced font families for glitching effect with COLORFUL variations
-  final List<Map<String, dynamic>> _glitchVariations = [
-    {
-      'font': GoogleFonts.inter,
-      'weight': FontWeight.w900,
-      'italic': false,
-      'color': Color(0xFFFF5252), // Vibrant red
-    },
-    {
-      'font': GoogleFonts.robotoMono,
-      'weight': FontWeight.w700,
-      'italic': false,
-      'color': Color(0xFFFFEB3B), // Bright yellow
-    },
-    {
-      'font': GoogleFonts.poppins,
-      'weight': FontWeight.w800,
-      'italic': true,
-      'color': Color(0xFF4CAF50), // Vivid green
-    },
-    {
-      'font': GoogleFonts.courierPrime,
-      'weight': FontWeight.bold,
-      'italic': false,
-      'color': Color(0xFF2196F3), // Electric blue
-    },
-    {
-      'font': GoogleFonts.lato,
-      'weight': FontWeight.w900,
-      'italic': true,
-      'color': Color(0xFFFF6B6B), // Coral red
-    },
-    {
-      'font': GoogleFonts.sourceCodePro,
-      'weight': FontWeight.w800,
-      'italic': false,
-      'color': Color(0xFFFFC107), // Amber yellow
-    },
-    {
-      'font': GoogleFonts.montserrat,
-      'weight': FontWeight.w700,
-      'italic': false,
-      'color': Color(0xFF66BB6A), // Fresh green
-    },
-    {
-      'font': GoogleFonts.ibmPlexMono,
-      'weight': FontWeight.bold,
-      'italic': true,
-      'color': Color(0xFF42A5F5), // Sky blue
-    },
-    {
-      'font': GoogleFonts.raleway,
-      'weight': FontWeight.w900,
-      'italic': true,
-      'color': Color(0xFFEF5350), // Red
-    },
-    {
-      'font': GoogleFonts.ubuntu,
-      'weight': FontWeight.w800,
-      'italic': false,
-      'color': Color(0xFFFDD835), // Gold yellow
-    },
-    {
-      'font': GoogleFonts.jetBrainsMono,
-      'weight': FontWeight.w700,
-      'italic': false,
-      'color': Color(0xFF26A69A), // Teal green
-    },
-    {
-      'font': GoogleFonts.inconsolata,
-      'weight': FontWeight.bold,
-      'italic': false,
-      'color': Color(0xFF1E88E5), // Deep blue
-    },
-  ];
-
-  int _currentVariationIndex = 0;
-  Map<String, dynamic> _currentVariation = {};
+  final Random _random = Random();
   bool _isInitializing = true;
-  Random _random = Random();
+
+  // Glitch effect parameters
+  double _glitchOffsetX = 0;
+  double _glitchOffsetY = 0;
+  double _redChannelOffset = 0;
+  double _cyanChannelOffset = 0;
+  double _blurAmount = 0;
+  double _scanLinePosition = 0;
 
   @override
   void initState() {
     super.initState();
-    _currentVariation = _glitchVariations[0];
-    _setupAnimation();
-    _startEnhancedGlitchEffect();
+    _setupAnimations();
+    _startCyberpunkGlitchEffect();
     _initializeApp();
   }
 
-  void _setupAnimation() {
-    _animationController = AnimationController(
+  void _setupAnimations() {
+    _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
+    _glitchController = AnimationController(
+      duration: const Duration(milliseconds: 80),
+      vsync: this,
+    )..repeat();
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    ));
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
-    _animationController.forward();
+    _fadeController.forward();
+
+    // Scan line animation
+    _glitchController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _scanLinePosition = _glitchController.value;
+        });
+      }
+    });
   }
 
-  void _startEnhancedGlitchEffect() {
-    // Rapid variation switching for enhanced glitch effect
+  void _startCyberpunkGlitchEffect() {
     Future.doWhile(() async {
       if (!mounted) return false;
 
-      // Random delay between 60-120ms for natural glitch feel
-      await Future.delayed(Duration(milliseconds: 60 + _random.nextInt(60)));
+      await Future.delayed(Duration(milliseconds: 50 + _random.nextInt(100)));
 
       if (mounted && _isInitializing) {
         setState(() {
-          _currentVariationIndex = _random.nextInt(_glitchVariations.length);
-          _currentVariation = _glitchVariations[_currentVariationIndex];
+          // Chromatic aberration effect (red/cyan shift)
+          _redChannelOffset = _random.nextDouble() * 6 - 3;
+          _cyanChannelOffset = _random.nextDouble() * 6 - 3;
+
+          // Position glitch
+          _glitchOffsetX = _random.nextDouble() * 8 - 4;
+          _glitchOffsetY = _random.nextDouble() * 4 - 2;
+
+          // Blur variation
+          _blurAmount = _random.nextDouble() * 2;
         });
         return true;
       }
@@ -197,7 +145,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _fadeController.dispose();
+    _glitchController.dispose();
     super.dispose();
   }
 
@@ -219,84 +168,118 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.colorScheme.surface,
-              theme.colorScheme.surface.withValues(alpha: 0.95),
-              // Soft RGB tone that changes with current glitch color
-              _currentVariation['color'].withValues(alpha: 0.08),
+              const Color(0xFF0A0A0A),
+              const Color(0xFF1A1A1A),
+              const Color(0xFF0F0F0F),
             ],
           ),
         ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-                _buildEnhancedGlitchingText(theme),
-                const SizedBox(height: 48),
-                _buildLoadingIndicator(theme),
-                const Spacer(flex: 3),
-                _buildInitializationStatus(theme),
-                const SizedBox(height: 32),
-              ],
+        child: Stack(
+          children: [
+            // Cyberpunk grid pattern background
+            _buildCyberpunkGrid(),
+
+            // Scan lines overlay
+            _buildScanLines(),
+
+            // Main content
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2),
+                    _buildCyberpunkGlitchText(theme),
+                    const SizedBox(height: 48),
+                    _buildLoadingIndicator(theme),
+                    const Spacer(flex: 3),
+                    _buildInitializationStatus(theme),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEnhancedGlitchingText(ThemeData theme) {
-    final fontFunction = _currentVariation['font'] as TextStyle Function({
-      TextStyle? textStyle,
-      Color? color,
-      Color? backgroundColor,
-      double? fontSize,
-      FontWeight? fontWeight,
-      FontStyle? fontStyle,
-      double? letterSpacing,
-      double? wordSpacing,
-      TextBaseline? textBaseline,
-      double? height,
-      Locale? locale,
-      Paint? foreground,
-      Paint? background,
-      List<Shadow>? shadows,
-      List<FontFeature>? fontFeatures,
-      TextDecoration? decoration,
-      Color? decorationColor,
-      TextDecorationStyle? decorationStyle,
-      double? decorationThickness,
-    });
+  Widget _buildCyberpunkGrid() {
+    return CustomPaint(
+      size: Size(double.infinity, double.infinity),
+      painter: _CyberpunkGridPainter(),
+    );
+  }
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 50),
-      child: Text(
-        'CTRL',
-        key: ValueKey(_currentVariationIndex),
-        style: fontFunction(
-          fontSize: 72.sp,
-          fontWeight: _currentVariation['weight'],
-          fontStyle:
-              _currentVariation['italic'] ? FontStyle.italic : FontStyle.normal,
-          // Use the colorful variations without clashing
-          color: (_currentVariation['color'] as Color).withValues(alpha: 0.95),
-          letterSpacing: _currentVariation['italic'] ? 6 : 8,
-          shadows: [
-            Shadow(
-              color:
-                  (_currentVariation['color'] as Color).withValues(alpha: 0.5),
-              blurRadius: 20,
-              offset: Offset(_currentVariation['italic'] ? -2 : 0, 3),
-            ),
-            Shadow(
-              color: (_currentVariation['color'] as Color).withValues(alpha: 0.3),
-              blurRadius: 40,
-              offset: Offset(_currentVariation['italic'] ? 2 : -2, 2),
-            ),
-          ],
+  Widget _buildScanLines() {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: _ScanLinePainter(
+          position: _scanLinePosition,
+          color: Colors.cyan.withValues(alpha: 0.1),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCyberpunkGlitchText(ThemeData theme) {
+    return Stack(
+      children: [
+        // Red chromatic aberration layer
+        Transform.translate(
+          offset: Offset(_redChannelOffset, _glitchOffsetY),
+          child: _buildGlitchTextLayer(
+            'CTRL',
+            Colors.red.withValues(alpha: 0.7),
+          ),
+        ),
+        // Cyan chromatic aberration layer
+        Transform.translate(
+          offset: Offset(_cyanChannelOffset, -_glitchOffsetY),
+          child: _buildGlitchTextLayer(
+            'CTRL',
+            Colors.cyan.withValues(alpha: 0.7),
+          ),
+        ),
+        // Main text with blur
+        Transform.translate(
+          offset: Offset(_glitchOffsetX, _glitchOffsetY),
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: _blurAmount,
+              sigmaY: _blurAmount,
+            ),
+            child: _buildGlitchTextLayer('CTRL', Colors.white),
+          ),
+        ),
+        // Sharp overlay text
+        _buildGlitchTextLayer('CTRL', Colors.white.withValues(alpha: 0.9)),
+      ],
+    );
+  }
+
+  Widget _buildGlitchTextLayer(String text, Color color) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 72.sp,
+        fontWeight: FontWeight.w900,
+        color: color,
+        letterSpacing: 8,
+        shadows: [
+          Shadow(
+            color: color.withValues(alpha: 0.5),
+            blurRadius: 20,
+            offset: const Offset(0, 3),
+          ),
+          Shadow(
+            color: color.withValues(alpha: 0.3),
+            blurRadius: 40,
+            offset: const Offset(2, 2),
+          ),
+        ],
       ),
     );
   }
@@ -312,7 +295,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: CircularProgressIndicator(
               strokeWidth: 3,
               valueColor: AlwaysStoppedAnimation<Color>(
-                (_currentVariation['color'] as Color).withValues(alpha: 0.8),
+                Colors.cyan.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -320,7 +303,7 @@ class _SplashScreenState extends State<SplashScreen>
           Text(
             'Initializing...',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Colors.cyan.withValues(alpha: 0.7),
               letterSpacing: 1.5,
             ),
           ),
@@ -351,18 +334,19 @@ class _SplashScreenState extends State<SplashScreen>
         SizedBox(
           width: 2.h,
           height: 2.h,
-          child: isLoading
-              ? CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    _currentVariation['color'].withValues(alpha: 0.5),
+          child:
+              isLoading
+                  ? CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.cyan.withValues(alpha: 0.5),
+                    ),
+                  )
+                  : CustomIconWidget(
+                    iconName: 'check_circle',
+                    color: Colors.cyan,
+                    size: 2.h,
                   ),
-                )
-              : CustomIconWidget(
-                  iconName: 'check_circle',
-                  color: _currentVariation['color'],
-                  size: 2.h,
-                ),
         ),
         SizedBox(width: 2.w),
         Text(
@@ -374,5 +358,71 @@ class _SplashScreenState extends State<SplashScreen>
         ),
       ],
     );
+  }
+}
+
+/// Custom painter for cyberpunk grid pattern
+class _CyberpunkGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = Colors.cyan.withValues(alpha: 0.03)
+          ..strokeWidth = 1
+          ..style = PaintingStyle.stroke;
+
+    // Draw vertical lines
+    for (double x = 0; x < size.width; x += 40) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Draw horizontal lines
+    for (double y = 0; y < size.height; y += 40) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Custom painter for scan line effect
+class _ScanLinePainter extends CustomPainter {
+  final double position;
+  final Color color;
+
+  _ScanLinePainter({required this.position, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 2;
+
+    final y = size.height * position;
+
+    // Main scan line
+    canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+
+    // Fading trail
+    final gradientPaint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              color.withValues(alpha: 0),
+              color,
+              color.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromLTWH(0, y - 20, size.width, 40));
+
+    canvas.drawRect(Rect.fromLTWH(0, y - 20, size.width, 40), gradientPaint);
+  }
+
+  @override
+  bool shouldRepaint(_ScanLinePainter oldDelegate) {
+    return oldDelegate.position != position;
   }
 }

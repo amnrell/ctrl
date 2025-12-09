@@ -67,8 +67,14 @@ class DataComplianceService {
   Future<Map<String, bool>> getDataSharingPermissions() async {
     final prefs = await SharedPreferences.getInstance();
     return {
+      'emotional_analysis':
+          prefs.getBool('permission_emotional_analysis') ?? true,
+      'screen_time_correlation':
+          prefs.getBool('permission_screen_time_correlation') ?? true,
       'analytics': prefs.getBool('permission_analytics') ?? true,
       'ai_training': prefs.getBool('permission_ai_training') ?? false,
+      'educational_content':
+          prefs.getBool('permission_educational_content') ?? true,
       'personalization': prefs.getBool('permission_personalization') ?? true,
       'third_party': prefs.getBool('permission_third_party') ?? false,
     };
@@ -115,9 +121,10 @@ class DataComplianceService {
         final bytes = utf8.encode(jsonData);
         final blob = html.Blob([bytes]);
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute("download", fileName)
-          ..click();
+        final anchor =
+            html.AnchorElement(href: url)
+              ..setAttribute("download", fileName)
+              ..click();
         html.Url.revokeObjectUrl(url);
       } else {
         // Mobile download
@@ -131,10 +138,7 @@ class DataComplianceService {
             SnackBar(
               content: Text('Data exported to: ${file.path}'),
               duration: const Duration(seconds: 5),
-              action: SnackBarAction(
-                label: 'OK',
-                onPressed: () {},
-              ),
+              action: SnackBarAction(label: 'OK', onPressed: () {}),
             ),
           );
         }
@@ -199,55 +203,125 @@ class DataComplianceService {
     return await showDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: Text(
-              'Delete All Data',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.error,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'This action will permanently delete:',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+          builder:
+              (context) => AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: theme.colorScheme.error,
+                      size: 28,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Delete My Account',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer.withValues(
+                          alpha: 0.3,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: theme.colorScheme.error.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        'This will permanently delete your account and completely remove you from our system.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'All of the following will be permanently deleted:',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    _buildDataItem(
+                      theme,
+                      '• Your account and profile information',
+                    ),
+                    _buildDataItem(theme, '• All vibe preferences and history'),
+                    _buildDataItem(theme, '• Complete usage analytics data'),
+                    _buildDataItem(theme, '• AI conversation history'),
+                    _buildDataItem(theme, '• Theme and font customizations'),
+                    _buildDataItem(theme, '• Notification preferences'),
+                    _buildDataItem(theme, '• All permissions and settings'),
+                    SizedBox(height: 16),
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.block,
+                            color: theme.colorScheme.error,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'This action is irreversible and cannot be undone.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildDataItem(theme, '• All vibe preferences'),
-                _buildDataItem(theme, '• Usage analytics history'),
-                _buildDataItem(theme, '• AI conversation history'),
-                _buildDataItem(theme, '• Theme and font settings'),
-                _buildDataItem(theme, '• Notification preferences'),
-                const SizedBox(height: 16),
-                Text(
-                  'This action cannot be undone.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w600,
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.error,
+                      foregroundColor: theme.colorScheme.onError,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'Delete My Account',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
-                ),
-                child: const Text('Delete All Data'),
-              ),
-            ],
-          ),
         ) ??
         false;
   }

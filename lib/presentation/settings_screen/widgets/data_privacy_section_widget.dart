@@ -6,7 +6,6 @@ import '../../../services/data_compliance_service.dart';
 import '../../../widgets/custom_icon_widget.dart';
 
 /// Data Privacy Section Widget with enhanced transparency features
-/// Includes delete all data, export data, and granular permissions management
 class DataPrivacySectionWidget extends StatefulWidget {
   final DataComplianceService complianceService;
   final VoidCallback onDataDeleted;
@@ -47,8 +46,9 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
 
   Future<void> _exportData() async {
     setState(() => _isLoading = true);
-    final success =
-        await widget.complianceService.exportUserDataToFile(context);
+    final success = await widget.complianceService.exportUserDataToFile(
+      context,
+    );
     setState(() => _isLoading = false);
 
     if (mounted) {
@@ -57,9 +57,10 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
           content: Text(
             success ? 'Data exported successfully' : 'Failed to export data',
           ),
-          backgroundColor: success
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.error,
+          backgroundColor:
+              success
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -91,15 +92,64 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Delete All Data Button
-          _buildActionTile(
-            context,
-            icon: 'delete_forever',
-            title: 'Delete All Data',
-            subtitle: 'Permanently remove all your data from our servers',
-            color: theme.colorScheme.error,
-            onTap: widget.onDataDeleted,
-            isDestructive: true,
+          // CRITICAL: Delete My Account Section - Most Prominent
+          Container(
+            margin: EdgeInsets.all(4.w),
+            padding: EdgeInsets.all(4.w),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.colorScheme.error.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: theme.colorScheme.error,
+                      size: 24,
+                    ),
+                    SizedBox(width: 2.w),
+                    Text(
+                      'Account Deletion',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 1.5.h),
+                Text(
+                  'Permanently delete your account and all associated data. This action removes you completely from our system and cannot be undone.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: widget.onDataDeleted,
+                    icon: Icon(Icons.delete_forever, size: 20),
+                    label: Text('Delete My Account'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.error,
+                      foregroundColor: theme.colorScheme.onError,
+                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           Divider(
@@ -112,7 +162,7 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
             context,
             icon: 'download',
             title: 'Export My Data',
-            subtitle: 'Download a copy of all your data',
+            subtitle: 'Download a complete copy of all your data',
             color: theme.colorScheme.primary,
             onTap: _exportData,
           ),
@@ -122,7 +172,7 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
             color: theme.colorScheme.outline.withValues(alpha: 0.1),
           ),
 
-          // Permissions Header
+          // AI Data Transparency Section
           Padding(
             padding: EdgeInsets.all(4.w),
             child: Column(
@@ -136,11 +186,13 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
                       size: 20,
                     ),
                     SizedBox(width: 2.w),
-                    Text(
-                      'AI Data Collection & Permissions',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
+                    Expanded(
+                      child: Text(
+                        'AI Data Collection Transparency',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ],
@@ -149,8 +201,9 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
                 Container(
                   padding: EdgeInsets.all(3.w),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.3),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: theme.colorScheme.primary.withValues(alpha: 0.2),
@@ -161,40 +214,72 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'How Adaptive Emotional Intelligence Works',
+                        'How Your Data Powers Adaptive Emotional Intelligence',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.primary,
                         ),
                       ),
                       SizedBox(height: 1.h),
-                      _buildInfoBullet(
-                        context,
-                        'Analyzes conversation sentiment and emotional keywords to detect patterns',
-                      ),
-                      _buildInfoBullet(
-                        context,
-                        'Tracks vibe preferences and usage timing for personalized recommendations',
-                      ),
-                      _buildInfoBullet(
-                        context,
-                        'Correlates social media activity with emotional states for insights',
-                      ),
-                      _buildInfoBullet(
-                        context,
-                        'Uses anonymized aggregated data to improve prediction accuracy',
-                      ),
-                      _buildInfoBullet(
-                        context,
-                        'References research-backed stress reduction strategies and articles',
+                      Text(
+                        'We believe in complete transparency about how your data helps create personalized experiences:',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.8,
+                          ),
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                       SizedBox(height: 1.h),
-                      Text(
-                        'Control your data permissions below to customize what the AI can access.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.7),
-                          fontStyle: FontStyle.italic,
+                      _buildInfoBullet(
+                        context,
+                        'Emotional Pattern Analysis: AI analyzes conversation sentiment and emotional keywords to detect patterns and provide insights',
+                      ),
+                      _buildInfoBullet(
+                        context,
+                        'Behavioral Correlation: Tracks vibe preferences and usage timing to offer personalized recommendations at optimal moments',
+                      ),
+                      _buildInfoBullet(
+                        context,
+                        'Contextual Integration: Correlates screen time and activity with emotional states for comprehensive wellbeing insights',
+                      ),
+                      _buildInfoBullet(
+                        context,
+                        'Model Improvement: Uses anonymized, aggregated data to improve prediction accuracy across all users',
+                      ),
+                      _buildInfoBullet(
+                        context,
+                        'Educational Content: References research-backed stress reduction strategies and articles tailored to your emotional state',
+                      ),
+                      SizedBox(height: 1.h),
+                      Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondary.withValues(
+                            alpha: 0.1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: theme.colorScheme.secondary,
+                            ),
+                            SizedBox(width: 2.w),
+                            Expanded(
+                              child: Text(
+                                'You control every aspect. Toggle permissions below to customize what data the AI can access.',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -204,12 +289,24 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
             ),
           ),
 
-          // Permission Toggles
+          // Granular Permission Controls
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Text(
+              'Data Collection Controls',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          SizedBox(height: 1.h),
+
           _buildPermissionTile(
             context,
             title: 'Emotional Pattern Analysis',
             description:
-                'Allow AI to analyze your conversations for emotional insights',
+                'Allow AI to analyze your conversations for emotional insights and pattern detection',
             permissionKey: 'emotional_analysis',
           ),
 
@@ -225,15 +322,15 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
             context,
             title: 'Usage Analytics',
             description:
-                'Allow anonymous usage data collection for app improvement',
+                'Share anonymous usage data to help improve app functionality',
             permissionKey: 'analytics',
           ),
 
           _buildPermissionTile(
             context,
-            title: 'AI Training',
+            title: 'AI Model Training',
             description:
-                'Use my anonymized conversations to improve AI responses',
+                'Use anonymized conversations to improve AI response accuracy for all users',
             permissionKey: 'ai_training',
           ),
 
@@ -241,7 +338,7 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
             context,
             title: 'Educational Content Access',
             description:
-                'Allow AI to reference stress-reducing articles and research',
+                'Allow AI to reference stress-reducing articles and research tailored to your state',
             permissionKey: 'educational_content',
           ),
 
@@ -255,37 +352,49 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
 
           _buildPermissionTile(
             context,
-            title: 'Third-Party Sharing',
+            title: 'Third-Party Data Sharing',
             description:
-                'Share data with social media platforms for enhanced features',
+                'Share data with integrated platforms for enhanced cross-app features',
             permissionKey: 'third_party',
           ),
 
           SizedBox(height: 2.h),
 
-          // Privacy Policy Link
+          // Privacy Policy and Data Retention
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
-                CustomIconWidget(
-                  iconName: 'shield',
-                  color: theme.colorScheme.primary,
-                  size: 18,
-                ),
-                SizedBox(width: 2.w),
-                InkWell(
-                  onTap: () {
-                    // Open privacy policy
-                  },
-                  child: Text(
-                    'View Privacy Policy',
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomIconWidget(
+                      iconName: 'shield',
                       color: theme.colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                      fontWeight: FontWeight.w600,
+                      size: 18,
                     ),
+                    SizedBox(width: 2.w),
+                    InkWell(
+                      onTap: () {
+                        // Open privacy policy
+                      },
+                      child: Text(
+                        'View Privacy Policy',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  'Data Retention: We keep your data only as long as your account is active. Delete your account to remove all data immediately.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -321,11 +430,7 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: CustomIconWidget(
-                  iconName: icon,
-                  color: color,
-                  size: 24,
-                ),
+                child: CustomIconWidget(iconName: icon, color: color, size: 24),
               ),
             ),
             SizedBox(width: 3.w),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
-import '../core/app_export.dart';
 import './routes/app_routes.dart';
 import './services/theme_manager_service.dart';
+import 'core/app_export.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,28 +14,58 @@ void main() async {
   final themeManager = ThemeManagerService();
   await themeManager.initialize();
 
-  runApp(MyApp(themeManager: themeManager));
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  // Check if onboarding is completed
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+
+  runApp(CtrlApp(
+    showOnboarding: !onboardingCompleted,
+    themeManager: themeManager,
+  ));
 }
 
-class MyApp extends StatefulWidget {
+class CtrlApp extends StatefulWidget {
+  final bool showOnboarding;
   final ThemeManagerService themeManager;
 
-  const MyApp({super.key, required this.themeManager});
+  const CtrlApp({
+    super.key,
+    required this.showOnboarding,
+    required this.themeManager,
+  });
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<CtrlApp> createState() => _CtrlAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _CtrlAppState extends State<CtrlApp> {
   @override
   void initState() {
     super.initState();
     // Listen to theme changes
-    widget.themeManager.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    widget.themeManager.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.themeManager.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -41,13 +73,16 @@ class _MyAppState extends State<MyApp> {
     return Sizer(
       builder: (context, orientation, deviceType) {
         return MaterialApp(
-          title: 'ctrl',
+          title: 'CTRL',
+          debugShowCheckedModeBanner: false,
           theme: widget.themeManager.getCurrentTheme(),
           darkTheme: widget.themeManager.getCurrentTheme(),
           themeMode: widget.themeManager.isLightMode
               ? ThemeMode.light
               : ThemeMode.dark,
-          // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
+          initialRoute:
+              widget.showOnboarding ? '/onboarding-flow' : '/splash-screen',
+          routes: AppRoutes.routes,
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
@@ -56,10 +91,6 @@ class _MyAppState extends State<MyApp> {
               child: child!,
             );
           },
-          // 🚨 END CRITICAL SECTION
-          debugShowCheckedModeBanner: false,
-          routes: AppRoutes.routes,
-          initialRoute: AppRoutes.initial,
         );
       },
     );

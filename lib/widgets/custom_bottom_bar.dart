@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+
 /// Navigation item configuration for the bottom bar
 enum CustomBottomBarItem {
   dashboard(
@@ -8,24 +9,29 @@ enum CustomBottomBarItem {
     icon: Icons.home_outlined,
     activeIcon: Icons.home,
     label: 'Home',
+    useCustomIcon: false,
   ),
   ctrlCenter(
     route: '/ctrl-center',
     icon: Icons.psychology_outlined,
     activeIcon: Icons.psychology,
     label: 'CTRL',
+    useCustomIcon: true,
+    customIconPath: 'assets/images/ctrl-logo-png-transparent-1765008694800.png',
   ),
   analytics(
     route: '/usage-analytics',
     icon: Icons.bar_chart_outlined,
     activeIcon: Icons.bar_chart,
     label: 'Analytics',
+    useCustomIcon: false,
   ),
   settings(
-    route: '/notification-settings',
+    route: '/settings-screen',
     icon: Icons.settings_outlined,
     activeIcon: Icons.settings,
     label: 'Settings',
+    useCustomIcon: false,
   );
 
   const CustomBottomBarItem({
@@ -33,12 +39,16 @@ enum CustomBottomBarItem {
     required this.icon,
     required this.activeIcon,
     required this.label,
+    this.useCustomIcon = false,
+    this.customIconPath,
   });
 
   final String route;
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final bool useCustomIcon;
+  final String? customIconPath;
 }
 
 /// Custom bottom navigation bar widget implementing thumb-friendly interaction design
@@ -85,6 +95,7 @@ class _CustomBottomBarState extends State<CustomBottomBar>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   int _currentIndex = 0;
+  final Map<String, bool> _imageLoadErrors = {};
 
   @override
   void initState() {
@@ -97,13 +108,9 @@ class _CustomBottomBarState extends State<CustomBottomBar>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -164,7 +171,8 @@ class _CustomBottomBarState extends State<CustomBottomBar>
 
     // Use custom vibe color or fall back to theme primary
     final activeColor = widget.vibeColor ?? colorScheme.primary;
-    final inactiveColor = bottomNavTheme.unselectedItemColor ??
+    final inactiveColor =
+        bottomNavTheme.unselectedItemColor ??
         colorScheme.onSurface.withAlpha(150);
     final backgroundColor =
         bottomNavTheme.backgroundColor ?? colorScheme.surface;
@@ -216,9 +224,10 @@ class _CustomBottomBarState extends State<CustomBottomBar>
 
     return Expanded(
       child: ScaleTransition(
-        scale: index == _currentIndex
-            ? _scaleAnimation
-            : const AlwaysStoppedAnimation(1.0),
+        scale:
+            index == _currentIndex
+                ? _scaleAnimation
+                : const AlwaysStoppedAnimation(1.0),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -236,17 +245,13 @@ class _CustomBottomBarState extends State<CustomBottomBar>
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     transitionBuilder: (child, animation) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: child,
-                      );
+                      return ScaleTransition(scale: animation, child: child);
                     },
-                    child: Icon(
-                      isSelected ? item.activeIcon : item.icon,
-                      key: ValueKey(isSelected),
-                      color: isSelected ? activeColor : inactiveColor,
-                      size: 24,
-                      semanticLabel: '${item.label} navigation',
+                    child: _buildIconWidget(
+                      item,
+                      isSelected,
+                      activeColor,
+                      inactiveColor,
                     ),
                   ),
 
@@ -256,15 +261,16 @@ class _CustomBottomBarState extends State<CustomBottomBar>
                     AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOut,
-                      style: (isSelected
+                      style:
+                          (isSelected
                               ? textTheme.labelMedium?.copyWith(
-                                  color: activeColor,
-                                  fontWeight: FontWeight.w600,
-                                )
+                                color: activeColor,
+                                fontWeight: FontWeight.w600,
+                              )
                               : textTheme.labelMedium?.copyWith(
-                                  color: inactiveColor,
-                                  fontWeight: FontWeight.w400,
-                                )) ??
+                                color: inactiveColor,
+                                fontWeight: FontWeight.w400,
+                              )) ??
                           TextStyle(
                             fontSize: 12,
                             color: isSelected ? activeColor : inactiveColor,
@@ -284,6 +290,78 @@ class _CustomBottomBarState extends State<CustomBottomBar>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Builds the icon widget with proper error handling and fallback
+  Widget _buildIconWidget(
+    CustomBottomBarItem item,
+    bool isSelected,
+    Color activeColor,
+    Color inactiveColor,
+  ) {
+    final color = isSelected ? activeColor : inactiveColor;
+
+    // Handle custom icon (CTRL logo)
+    if (item.useCustomIcon && item.customIconPath != null) {
+      final hasError = _imageLoadErrors[item.customIconPath] ?? false;
+
+      // If image failed to load, use stylized text fallback
+      if (hasError) {
+        return _buildCtrlTextIcon(color, item.label);
+      }
+
+      // Try to load the image with error handling
+      return Image.asset(
+        item.customIconPath!,
+        width: 24,
+        height: 24,
+        color: color,
+        colorBlendMode: BlendMode.srcIn,
+        semanticLabel: '${item.label} navigation',
+        errorBuilder: (context, error, stackTrace) {
+          // Mark this image as having an error
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _imageLoadErrors[item.customIconPath!] = true;
+              });
+            }
+          });
+          // Return fallback immediately
+          return _buildCtrlTextIcon(color, item.label);
+        },
+      );
+    }
+
+    // Standard icon
+    return Icon(
+      isSelected ? item.activeIcon : item.icon,
+      key: ValueKey('icon_$isSelected'),
+      color: color,
+      size: 24,
+      semanticLabel: '${item.label} navigation',
+    );
+  }
+
+  /// Builds a stylized text-based icon for CTRL as fallback
+  Widget _buildCtrlTextIcon(Color color, String label) {
+    return Container(
+      key: ValueKey('text_icon_$label'),
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      child: Text(
+        'CTRL',
+        style: TextStyle(
+          fontSize: 8,
+          fontWeight: FontWeight.w900,
+          color: color,
+          letterSpacing: -0.5,
+          height: 1,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

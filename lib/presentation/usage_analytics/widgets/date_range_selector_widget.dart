@@ -23,7 +23,7 @@ class DateRangeSelectorWidget extends StatelessWidget {
     final ranges = ['Today', 'This Week', 'This Month', 'All Time'];
 
     return Container(
-      color: theme.colorScheme.surface,
+      color: Colors.transparent,
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       child: Row(
         children: [
@@ -39,7 +39,8 @@ class DateRangeSelectorWidget extends StatelessWidget {
                       label: Text(range),
                       selected: isSelected,
                       onSelected: (_) => onRangeChanged(range),
-                      backgroundColor: theme.colorScheme.surface,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       selectedColor:
                           theme.colorScheme.primary.withValues(alpha: 0.15),
                       labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -52,7 +53,7 @@ class DateRangeSelectorWidget extends StatelessWidget {
                       side: BorderSide(
                         color: isSelected
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.outline,
+                            : theme.colorScheme.outline.withValues(alpha: 0.3),
                       ),
                     ),
                   );
