@@ -41,3 +41,10 @@ def list_moods(decoded=Depends(verify_token)):
         }
         for e in entries
     ]
+from app.utils.logging import log_api_call
+
+@router.post("/moods")
+def create_mood(data: dict, decoded=Depends(verify_token)):
+    ...
+    log_api_call("/moods", user_id=str(user.id), extra={"action": "create"})
+    ...
