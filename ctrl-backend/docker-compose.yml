@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: ctrl-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ctrl_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Ctrl2025!}
+      POSTGRES_DB: ${POSTGRES_DB:-ctrl_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ctrl_user} -d ${POSTGRES_DB:-ctrl_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ctrl-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctrl-backend
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ctrl_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Ctrl2025!}
+      POSTGRES_DB: ${POSTGRES_DB:-ctrl_db}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ctrl_user}:${POSTGRES_PASSWORD:-Ctrl2025!}@db:5432/${POSTGRES_DB:-ctrl_db}
+      SECRET_KEY: ${SECRET_KEY:-change_me_in_production}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount source code for development (remove in production)
+      - .:/app
+    networks:
+      - ctrl-network
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        until pg_isready -h db -U $${POSTGRES_USER:-ctrl_user} -d $${POSTGRES_DB:-ctrl_db}; do
+          echo 'Database is unavailable - sleeping'
+          sleep 2
+        done &&
+        echo 'Database is ready!' &&
+        echo 'Running migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting application...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ctrl-network:
+    driver: bridge
+
