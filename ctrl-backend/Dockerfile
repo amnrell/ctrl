@@ -35,12 +35,12 @@ COPY . .
 # Add local bin to PATH
 ENV PATH=/root/.local/bin:$PATH
 
-# Expose port
-EXPOSE 8080
+# Expose port (Render uses $PORT, default to 8080)
+EXPOSE ${PORT:-8080}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/v1/health')"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-8080}/api/v1/health')"
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run the application (Render uses $PORT environment variable)
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
