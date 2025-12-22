@@ -1,48 +1,91 @@
+####################################
 # Miscellaneous
+####################################
 *.class
 *.log
 *.pyc
 *.swp
 .DS_Store
-.atom/
-.build/
-.buildlog/
 .history
 .svn/
 .swiftpm/
 migrate_working_dir/
-pubspec.lock
 
-# IntelliJ related
+####################################
+# Environment files (never commit)
+####################################
+.env
+.env.*
+.env.txt
+
+####################################
+# IDE / Editor
+####################################
 *.iml
 *.ipr
 *.iws
 .idea/
+.vscode/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+####################################
+# Flutter / Dart
+####################################
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
-/web/
+build/
+coverage/
+.metadata
 
-# Symbolication related
+####################################
+# Flutter Web preview output
+# (we will commit /docs intentionally when ready)
+####################################
+# Uncomment this AFTER Christmas demo if you want to stop tracking it
+# docs/
+
+####################################
+# Platform folders (generated)
+####################################
+android/
+ios/
+windows/
+macos/
+linux/
+
+####################################
+# Android build artifacts
+####################################
+android/app/debug
+android/app/profile
+android/app/release
+android/app/.cxx
+
+####################################
+# Web
+####################################
+web/
+
+####################################
+# Symbolication / Obfuscation
+####################################
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-android/app/.cxx
+####################################
+# Backend (Python)
+####################################
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+venv/
+
+####################################
+# OS
+####################################
+Thumbs.db
