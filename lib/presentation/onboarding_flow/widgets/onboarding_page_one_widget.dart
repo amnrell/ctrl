@@ -73,7 +73,7 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
                     ),
                     child: Center(
                       child: CustomImageWidget(
-                        imagePath:
+                    
                             'assets/images/ctrl-logo-png-transparent-1765008694800.png',
                         width: 20.w,
                         height: 20.w,

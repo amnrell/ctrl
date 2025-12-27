@@ -3,28 +3,23 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
-import './routes/app_routes.dart';
-import './services/theme_manager_service.dart';
-import 'core/app_export.dart';
+import 'routes/app_routes.dart';
+import 'services/theme_manager_service.dart';
 
-void main() async {
+/// 🚀 ENTRYPOINT
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize theme manager
   final themeManager = ThemeManagerService();
   await themeManager.initialize();
 
-  // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
-  // Check if onboarding is completed
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
@@ -52,7 +47,6 @@ class _CtrlAppState extends State<CtrlApp> {
   @override
   void initState() {
     super.initState();
-    // Listen to theme changes
     widget.themeManager.addListener(_onThemeChanged);
   }
 
@@ -63,9 +57,7 @@ class _CtrlAppState extends State<CtrlApp> {
   }
 
   void _onThemeChanged() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -75,22 +67,27 @@ class _CtrlAppState extends State<CtrlApp> {
         return MaterialApp(
           title: 'CTRL',
           debugShowCheckedModeBanner: false,
+
           theme: widget.themeManager.getCurrentTheme(),
           darkTheme: widget.themeManager.getCurrentTheme(),
           themeMode: widget.themeManager.isLightMode
               ? ThemeMode.light
               : ThemeMode.dark,
-          initialRoute:
-              widget.showOnboarding ? '/onboarding-flow' : '/splash-screen',
+
+          /// 👇 First screen shown on launch
+          initialRoute: widget.showOnboarding
+              ? '/onboarding-flow'
+              : '/splash-screen',
+
+          /// 👇 Your global routes file
           routes: AppRoutes.routes,
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(1.0),
-              ),
-              child: child!,
-            );
-          },
+
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.0),
+            ),
+            child: child!,
+          ),
         );
       },
     );

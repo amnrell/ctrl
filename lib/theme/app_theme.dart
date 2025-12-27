@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  // Vibe-based Primary Colors
+  // =========================
+  // COLORS (used everywhere)
+  // =========================
   static const Color primaryZen = Color(0xFF4A7C59);
   static const Color primaryEnergy = Color(0xFFE8B86D);
   static const Color primaryReflection = Color(0xFF6B73FF);
@@ -23,17 +25,14 @@ class AppTheme {
   static const Color surfaceDark = Color(0xFF1E1E1E);
   static const Color cardDark = Color(0xFF2D2D2D);
 
-  static const Color shadowLight = Color(0x33000000);
-  static const Color shadowDark = Color(0x33FFFFFF);
-
-  static const Color dividerLight = Color(0x26000000);
-  static const Color dividerDark = Color(0x26FFFFFF);
-
-  /// LIGHT THEME
-  static ThemeData lightTheme = ThemeData(
+  // =========================
+  // LIGHT THEME
+  // =========================
+  static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: neutralBase,
+
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryZen,
       brightness: Brightness.light,
@@ -64,15 +63,6 @@ class AppTheme {
       labelColor: primaryZen,
       unselectedLabelColor: textSecondary,
       indicatorColor: primaryZen,
-      indicatorSize: TabBarIndicatorSize.label,
-      labelStyle: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
     ),
 
     dialogTheme: DialogThemeData(
@@ -96,11 +86,14 @@ class AppTheme {
     textTheme: GoogleFonts.interTextTheme(),
   );
 
-  /// DARK THEME
-  static ThemeData darkTheme = ThemeData(
+  // =========================
+  // DARK THEME
+  // =========================
+  static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: backgroundDark,
+
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryZen,
       brightness: Brightness.dark,
@@ -123,7 +116,7 @@ class AppTheme {
     ),
 
     tabBarTheme: const TabBarThemeData(
-      indicatorSize: TabBarIndicatorSize.label,
+      indicatorColor: primaryZen,
     ),
 
     dialogTheme: DialogThemeData(
@@ -139,28 +132,18 @@ class AppTheme {
     ),
   );
 
-  /// 🔑 REQUIRED BY Rocket theme_manager_service.dart
-  /// Restores vibe-based dynamic theming
+  // =========================
+  // REQUIRED BY ThemeManagerService
+  // =========================
   static ThemeData getVibeTheme({
     required bool isLight,
     required Color vibeColor,
   }) {
-    final baseTheme = isLight ? lightTheme : darkTheme;
+    final base = isLight ? lightTheme : darkTheme;
 
-    return baseTheme.copyWith(
-      colorScheme: baseTheme.colorScheme.copyWith(
+    return base.copyWith(
+      colorScheme: base.colorScheme.copyWith(
         primary: vibeColor,
-        primaryContainer: vibeColor.withOpacity(0.15),
-      ),
-      floatingActionButtonTheme:
-          baseTheme.floatingActionButtonTheme.copyWith(
-        backgroundColor: vibeColor,
-      ),
-      progressIndicatorTheme:
-          baseTheme.progressIndicatorTheme.copyWith(
-        color: vibeColor,
-        linearTrackColor: vibeColor.withOpacity(0.2),
-        circularTrackColor: vibeColor.withOpacity(0.2),
       ),
     );
   }
