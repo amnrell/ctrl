@@ -72,8 +72,6 @@ class BigQueryService {
 
       // In production, this would insert into BigQuery table
       // await _insertRow(tableId: 'social_media_events', row: row);
-
-      print('BigQuery Event Inserted: $platform - $eventType');
     } catch (e) {
       throw Exception('Failed to insert social media event: $e');
     }
@@ -131,8 +129,6 @@ class BigQueryService {
           eventData: event['data'],
         );
       }
-
-      print('Streamed ${events.length} events to BigQuery');
     } catch (e) {
       throw Exception('Failed to stream data to BigQuery: $e');
     }

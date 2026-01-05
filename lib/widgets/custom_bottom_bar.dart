@@ -178,6 +178,7 @@ class _CustomBottomBarState extends State<CustomBottomBar>
         bottomNavTheme.backgroundColor ?? colorScheme.surface;
 
     return Container(
+      height: 80,
       decoration: BoxDecoration(
         color: backgroundColor,
         boxShadow: [

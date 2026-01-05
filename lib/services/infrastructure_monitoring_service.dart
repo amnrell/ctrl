@@ -91,7 +91,6 @@ class InfrastructureMonitoringService {
       };
 
       // In production, this would export to file or send via email
-      print('Infrastructure Report Generated: ${report['generated_at']}');
     } catch (e) {
       throw Exception('Failed to generate infrastructure report: $e');
     }

@@ -45,7 +45,7 @@ class _ScreenTimeChartWidgetState extends State<ScreenTimeChartWidget> {
         });
       }
     } catch (e) {
-      print('Theme manager initialization error: $e');
+      // Error handled silently
       if (mounted) {
         setState(() {
           _cachedVibeColor = null;

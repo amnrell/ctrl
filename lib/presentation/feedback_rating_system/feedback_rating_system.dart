@@ -48,7 +48,7 @@ class _FeedbackRatingSystemState extends State<FeedbackRatingSystem> {
 
       setState(() => _isInitialized = true);
     } catch (e) {
-      print('Error initializing services: $e');
+      // Error handled silently
       setState(() => _isInitialized = true);
     }
   }
@@ -527,7 +527,7 @@ class _FeedbackRatingSystemState extends State<FeedbackRatingSystem> {
 
   void _handleFeedbackSubmit(Map<String, dynamic> feedbackData) {
     // In production, send to backend/analytics
-    print('Feedback submitted: $feedbackData');
+    // Feedback submission handled silently
 
     HapticFeedback.mediumImpact();
     setState(() => _showThankYou = true);

@@ -161,7 +161,7 @@ class SocialMediaOAuthService {
 
       return true;
     } catch (e) {
-      print('OAuth authentication error for $platformKey: $e');
+      // Error handled silently for production
       return false;
     }
   }
@@ -175,7 +175,7 @@ class SocialMediaOAuthService {
       await prefs.remove('${platformKey}_connected_at');
       return true;
     } catch (e) {
-      print('Error disconnecting $platformKey: $e');
+      // Error handled silently for production
       return false;
     }
   }

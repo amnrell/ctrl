@@ -104,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing services: $e');
+      // Error handled silently
       setState(() {
         _isInitialized = true;
         _isLoading = false;

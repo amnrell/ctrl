@@ -6,9 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../services/theme_manager_service.dart';
 
-/// Splash Screen with cyberpunk-style glitching CTRL text animation
-/// Features chromatic aberration, scan lines, blur effects, and dynamic color shifts
+/// Splash Screen with logo animation
+/// Features subtle glitch effects and dynamic color theming
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -20,25 +21,38 @@ class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _glitchController;
+  late AnimationController _logoScaleController;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _logoScaleAnimation;
 
   final Random _random = Random();
+  final ThemeManagerService _themeManager = ThemeManagerService();
   bool _isInitializing = true;
+  Color _primaryVibeColor = const Color(0xFF4A7C59); // Default Zen
 
   // Glitch effect parameters
   double _glitchOffsetX = 0;
   double _glitchOffsetY = 0;
-  double _redChannelOffset = 0;
-  double _cyanChannelOffset = 0;
   double _blurAmount = 0;
   double _scanLinePosition = 0;
 
   @override
   void initState() {
     super.initState();
-    _setupAnimations();
-    _startCyberpunkGlitchEffect();
-    _initializeApp();
+    _loadThemeAndSetup();
+  }
+
+  Future<void> _loadThemeAndSetup() async {
+    // Initialize theme manager and load vibe color
+    await _themeManager.initialize();
+    if (mounted) {
+      setState(() {
+        _primaryVibeColor = _themeManager.primaryVibeColor;
+      });
+      _setupAnimations();
+      _startSubtleGlitchEffect();
+      _initializeApp();
+    }
   }
 
   void _setupAnimations() {
@@ -52,12 +66,26 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     )..repeat();
 
+    _logoScaleController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
+    _logoScaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _logoScaleController,
+      curve: Curves.easeOutBack,
+    ));
+
     _fadeController.forward();
+    _logoScaleController.forward();
 
     // Scan line animation
     _glitchController.addListener(() {
@@ -69,24 +97,20 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  void _startCyberpunkGlitchEffect() {
+  void _startSubtleGlitchEffect() {
     Future.doWhile(() async {
       if (!mounted) return false;
 
-      await Future.delayed(Duration(milliseconds: 50 + _random.nextInt(100)));
+      await Future.delayed(Duration(milliseconds: 100 + _random.nextInt(150)));
 
       if (mounted && _isInitializing) {
         setState(() {
-          // Chromatic aberration effect (red/cyan shift)
-          _redChannelOffset = _random.nextDouble() * 6 - 3;
-          _cyanChannelOffset = _random.nextDouble() * 6 - 3;
+          // Subtle position glitch
+          _glitchOffsetX = _random.nextDouble() * 2 - 1;
+          _glitchOffsetY = _random.nextDouble() * 1 - 0.5;
 
-          // Position glitch
-          _glitchOffsetX = _random.nextDouble() * 8 - 4;
-          _glitchOffsetY = _random.nextDouble() * 4 - 2;
-
-          // Blur variation
-          _blurAmount = _random.nextDouble() * 2;
+          // Subtle blur variation
+          _blurAmount = _random.nextDouble() * 0.5;
         });
         return true;
       }
@@ -103,22 +127,38 @@ class _SplashScreenState extends State<SplashScreen>
         _prepareAIContext(),
       ]);
 
-      await Future.delayed(const Duration(seconds: 3));
+      // Wait for minimum splash duration (Apple requirement: at least 2 seconds)
+      // Also ensure logo animation completes
+      await Future.wait([
+        Future.delayed(const Duration(seconds: 2)),
+        _logoScaleController.forward().then((_) => Future.delayed(const Duration(milliseconds: 500))),
+      ]);
 
       if (mounted) {
         setState(() {
           _isInitializing = false;
         });
 
-        HapticFeedback.lightImpact();
-        _navigateToNextScreen();
+        // Wait for fade animation to complete before navigation
+        await _fadeController.forward();
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (mounted) {
+          HapticFeedback.lightImpact();
+          _navigateToNextScreen();
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isInitializing = false;
         });
-        _navigateToNextScreen();
+        // Ensure animation completes even on error
+        await _fadeController.forward();
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) {
+          _navigateToNextScreen();
+        }
       }
     }
   }
@@ -140,6 +180,8 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToNextScreen() {
+    // Navigate to AuthGate or Dashboard based on authentication state
+    // For now, navigate to dashboard (AuthGate will be added in PRIORITY 2)
     Navigator.pushReplacementNamed(context, '/main-dashboard');
   }
 
@@ -147,6 +189,7 @@ class _SplashScreenState extends State<SplashScreen>
   void dispose() {
     _fadeController.dispose();
     _glitchController.dispose();
+    _logoScaleController.dispose();
     super.dispose();
   }
 
@@ -168,16 +211,16 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF0A0A0A),
-              const Color(0xFF1A1A1A),
-              const Color(0xFF0F0F0F),
+              _primaryVibeColor.withValues(alpha: 0.1),
+              theme.colorScheme.surface,
+              _primaryVibeColor.withValues(alpha: 0.05),
             ],
           ),
         ),
         child: Stack(
           children: [
-            // Cyberpunk grid pattern background
-            _buildCyberpunkGrid(),
+            // Subtle grid pattern background
+            _buildSubtleGrid(),
 
             // Scan lines overlay
             _buildScanLines(),
@@ -190,7 +233,7 @@ class _SplashScreenState extends State<SplashScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Spacer(flex: 2),
-                    _buildCyberpunkGlitchText(theme),
+                    _buildLogo(theme),
                     const SizedBox(height: 48),
                     _buildLoadingIndicator(theme),
                     const Spacer(flex: 3),
@@ -206,10 +249,10 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildCyberpunkGrid() {
+  Widget _buildSubtleGrid() {
     return CustomPaint(
       size: Size(double.infinity, double.infinity),
-      painter: _CyberpunkGridPainter(),
+      painter: _SubtleGridPainter(color: _primaryVibeColor),
     );
   }
 
@@ -218,68 +261,50 @@ class _SplashScreenState extends State<SplashScreen>
       child: CustomPaint(
         painter: _ScanLinePainter(
           position: _scanLinePosition,
-          color: Colors.cyan.withValues(alpha: 0.1),
+          color: _primaryVibeColor.withValues(alpha: 0.1),
         ),
       ),
     );
   }
 
-  Widget _buildCyberpunkGlitchText(ThemeData theme) {
-    return Stack(
-      children: [
-        // Red chromatic aberration layer
-        Transform.translate(
-          offset: Offset(_redChannelOffset, _glitchOffsetY),
-          child: _buildGlitchTextLayer(
-            'CTRL',
-            Colors.red.withValues(alpha: 0.7),
+  Widget _buildLogo(ThemeData theme) {
+    return ScaleTransition(
+      scale: _logoScaleAnimation,
+      child: Transform.translate(
+        offset: Offset(_glitchOffsetX, _glitchOffsetY),
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(
+            sigmaX: _blurAmount,
+            sigmaY: _blurAmount,
+          ),
+          child: Image.asset(
+            'assets/images/ctrl-logo-png-transparent-1765008694800.png',
+            width: 60.w,
+            height: 60.w,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback to SVG if PNG fails
+              return Image.asset(
+                'assets/images/img_app_logo.svg',
+                width: 60.w,
+                height: 60.w,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Final fallback to text if both assets fail
+                  return Text(
+                    'CTRL',
+                    style: GoogleFonts.inter(
+                      fontSize: 72.sp,
+                      fontWeight: FontWeight.w900,
+                      color: _primaryVibeColor,
+                      letterSpacing: 8,
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
-        // Cyan chromatic aberration layer
-        Transform.translate(
-          offset: Offset(_cyanChannelOffset, -_glitchOffsetY),
-          child: _buildGlitchTextLayer(
-            'CTRL',
-            Colors.cyan.withValues(alpha: 0.7),
-          ),
-        ),
-        // Main text with blur
-        Transform.translate(
-          offset: Offset(_glitchOffsetX, _glitchOffsetY),
-          child: ImageFiltered(
-            imageFilter: ImageFilter.blur(
-              sigmaX: _blurAmount,
-              sigmaY: _blurAmount,
-            ),
-            child: _buildGlitchTextLayer('CTRL', Colors.white),
-          ),
-        ),
-        // Sharp overlay text
-        _buildGlitchTextLayer('CTRL', Colors.white.withValues(alpha: 0.9)),
-      ],
-    );
-  }
-
-  Widget _buildGlitchTextLayer(String text, Color color) {
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 72.sp,
-        fontWeight: FontWeight.w900,
-        color: color,
-        letterSpacing: 8,
-        shadows: [
-          Shadow(
-            color: color.withValues(alpha: 0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 3),
-          ),
-          Shadow(
-            color: color.withValues(alpha: 0.3),
-            blurRadius: 40,
-            offset: const Offset(2, 2),
-          ),
-        ],
       ),
     );
   }
@@ -295,7 +320,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: CircularProgressIndicator(
               strokeWidth: 3,
               valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.cyan.withValues(alpha: 0.8),
+                _primaryVibeColor.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -303,7 +328,7 @@ class _SplashScreenState extends State<SplashScreen>
           Text(
             'Initializing...',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.cyan.withValues(alpha: 0.7),
+              color: _primaryVibeColor.withValues(alpha: 0.7),
               letterSpacing: 1.5,
             ),
           ),
@@ -339,12 +364,12 @@ class _SplashScreenState extends State<SplashScreen>
                   ? CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.cyan.withValues(alpha: 0.5),
+                      _primaryVibeColor.withValues(alpha: 0.5),
                     ),
                   )
                   : CustomIconWidget(
                     iconName: 'check_circle',
-                    color: Colors.cyan,
+                    color: _primaryVibeColor,
                     size: 2.h,
                   ),
         ),
@@ -361,13 +386,17 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-/// Custom painter for cyberpunk grid pattern
-class _CyberpunkGridPainter extends CustomPainter {
+/// Custom painter for subtle grid pattern
+class _SubtleGridPainter extends CustomPainter {
+  final Color color;
+
+  _SubtleGridPainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.cyan.withValues(alpha: 0.03)
+          ..color = color.withValues(alpha: 0.03)
           ..strokeWidth = 1
           ..style = PaintingStyle.stroke;
 
@@ -383,7 +412,7 @@ class _CyberpunkGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_SubtleGridPainter oldDelegate) => oldDelegate.color != color;
 }
 
 /// Custom painter for scan line effect

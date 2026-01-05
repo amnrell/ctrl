@@ -49,7 +49,7 @@ class _SocialMediaOAuthConnectionState
         _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing services: $e');
+      // Error handled silently for production
       setState(() => _isLoading = false);
     }
   }
@@ -100,7 +100,7 @@ class _SocialMediaOAuthConnectionState
         );
       }
     } catch (e) {
-      print('Connection error: $e');
+      // Error handled with user feedback
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(

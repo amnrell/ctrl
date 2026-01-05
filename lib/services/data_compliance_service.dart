@@ -169,7 +169,7 @@ class DataComplianceService {
 
       return true;
     } catch (e) {
-      debugPrint('Error deleting user data: $e');
+      // Error handled silently
       return false;
     }
   }

@@ -3,6 +3,7 @@ import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/theme_manager_service.dart';
+import '../../theme/app_theme.dart';
 import './widgets/onboarding_page_one_widget.dart';
 import './widgets/onboarding_page_two_widget.dart';
 import './widgets/onboarding_page_three_widget.dart';
@@ -22,7 +23,7 @@ class _OnboardingFlowState extends State<OnboardingFlow>
   final ThemeManagerService _themeManager = ThemeManagerService();
 
   int _currentPage = 0;
-  Color _currentVibeColor = const Color(0xFF4A7C59); // Default Zen
+  Color _currentVibeColor = AppTheme.primaryZen; // Default Zen
   String _selectedVibe = 'Zen';
 
   late AnimationController _animationController;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../theme/app_theme.dart';
+
 /// Third onboarding page - Initial vibe selection
 class OnboardingPageThreeWidget extends StatelessWidget {
   final Color vibeColor;
@@ -21,19 +23,19 @@ class OnboardingPageThreeWidget extends StatelessWidget {
     final vibes = [
       {
         'name': 'Zen',
-        'color': const Color(0xFF4A7C59),
+        'color': AppTheme.primaryZen,
         'icon': Icons.self_improvement,
         'description': 'Calm & Peaceful',
       },
       {
         'name': 'Energized',
-        'color': const Color(0xFFE8B86D),
+        'color': AppTheme.primaryEnergy,
         'icon': Icons.bolt,
         'description': 'Active & Motivated',
       },
       {
         'name': 'Reflective',
-        'color': const Color(0xFF6B73FF),
+        'color': AppTheme.primaryReflection,
         'icon': Icons.psychology,
         'description': 'Thoughtful & Contemplative',
       },

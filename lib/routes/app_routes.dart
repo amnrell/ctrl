@@ -10,12 +10,14 @@ import '../presentation/feedback_rating_system/feedback_rating_system.dart';
 import '../presentation/social_media_o_auth_connection/social_media_o_auth_connection.dart';
 import '../presentation/data_analytics_dashboard/data_analytics_dashboard.dart';
 import '../presentation/backend_infrastructure_monitor/backend_infrastructure_monitor.dart';
+import '../presentation/onboarding_flow/onboarding_flow.dart';
 
 class AppRoutes {
   static const String initial = '/';
   static const String mainDashboard = '/main-dashboard';
   static const String vibeSelection = '/vibe-selection';
   static const String splash = '/splash-screen';
+  static const String onboardingFlow = '/onboarding-flow';
   static const String usageAnalytics = '/usage-analytics';
   static const String ctrlCenter = '/ctrl-center';
   static const String settingsScreen = '/settings-screen';
@@ -31,6 +33,7 @@ class AppRoutes {
     mainDashboard: (context) => const MainDashboard(),
     vibeSelection: (context) => const VibeSelection(),
     splash: (context) => const SplashScreen(),
+    onboardingFlow: (context) => const OnboardingFlow(),
     usageAnalytics: (context) => const UsageAnalytics(),
     ctrlCenter: (context) => const CtrlCenter(),
     settingsScreen: (context) => const SettingsScreen(),

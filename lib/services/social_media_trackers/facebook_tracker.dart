@@ -36,12 +36,12 @@ class FacebookTracker {
   Future<int> getTotalEngagement() async {
     try {
       final posts = await getUserPosts();
-      return posts.fold(
+      return posts.fold<int>(
         0,
         (sum, post) =>
             sum +
-            (post['likes']?['summary']?['total_count'] ?? 0) +
-            (post['comments']?['summary']?['total_count'] ?? 0),
+            ((post['likes']?['summary']?['total_count'] ?? 0) as int) +
+            ((post['comments']?['summary']?['total_count'] ?? 0) as int),
       );
     } catch (e) {
       throw Exception('Failed to calculate Facebook engagement: $e');

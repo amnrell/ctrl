@@ -33,8 +33,7 @@ class BigQueryDataService {
   /// Send usage data to BigQuery
   Future<bool> sendUsageData(Map<String, dynamic> usageData) async {
     if (projectId.isEmpty || datasetId.isEmpty) {
-      print(
-          'BigQuery not configured - skipping data send (set BIGQUERY_PROJECT_ID and BIGQUERY_DATASET_ID)');
+      // BigQuery not configured - skipping data send
       return false;
     }
 
@@ -61,7 +60,7 @@ class BigQueryDataService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error sending data to BigQuery: $e');
+      // Error handled silently
       return false;
     }
   }
@@ -69,7 +68,7 @@ class BigQueryDataService {
   /// Batch send multiple data points
   Future<bool> sendBatchData(List<Map<String, dynamic>> dataPoints) async {
     if (projectId.isEmpty || datasetId.isEmpty) {
-      print('BigQuery not configured - skipping batch send');
+      // BigQuery not configured - skipping batch send
       return false;
     }
 
@@ -94,7 +93,7 @@ class BigQueryDataService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error sending batch data to BigQuery: $e');
+      // Error handled silently
       return false;
     }
   }
@@ -102,7 +101,7 @@ class BigQueryDataService {
   /// Query data from BigQuery
   Future<List<Map<String, dynamic>>?> queryData(String query) async {
     if (projectId.isEmpty || datasetId.isEmpty) {
-      print('BigQuery not configured - cannot query data');
+      // BigQuery not configured - cannot query data
       return null;
     }
 
@@ -123,7 +122,7 @@ class BigQueryDataService {
       }
       return null;
     } catch (e) {
-      print('Error querying BigQuery: $e');
+      // Error handled silently
       return null;
     }
   }
@@ -161,7 +160,7 @@ class BigQueryDataService {
       }
       return null;
     } catch (e) {
-      print('Error getting aggregated analytics: $e');
+      // Error handled silently, return mock data
       return _getMockAnalytics(startDate, endDate);
     }
   }
@@ -206,7 +205,7 @@ class BigQueryDataService {
       existingData.add(jsonEncode(dataPoint));
       await prefs.setStringList('pending_bigquery_data', existingData);
     } catch (e) {
-      print('Error storing local data point: $e');
+      // Error handled silently
     }
   }
 
@@ -230,7 +229,7 @@ class BigQueryDataService {
 
       return success;
     } catch (e) {
-      print('Error uploading pending data: $e');
+      // Error handled silently
       return false;
     }
   }

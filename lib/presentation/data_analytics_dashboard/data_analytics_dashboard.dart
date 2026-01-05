@@ -58,7 +58,7 @@ class _DataAnalyticsDashboardState extends State<DataAnalyticsDashboard>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading analytics: $e');
+      // Error handled silently
       setState(() => _isLoading = false);
     }
   }

@@ -12,6 +12,7 @@ import './widgets/usage_summary_card_widget.dart';
 import './widgets/vibe_indicator_card_widget.dart';
 import '../../services/theme_manager_service.dart';
 import '../../models/vibe_config.dart';
+import '../../theme/app_theme.dart';
 
 /// Main Dashboard screen serving as central hub for CTRL app
 /// Displays current vibe status and social media usage overview with dynamic theming
@@ -26,7 +27,7 @@ class _MainDashboardState extends State<MainDashboard>
     with SingleTickerProviderStateMixin {
   // Current vibe state
   String _currentVibe = 'Zen';
-  Color _currentVibeColor = const Color(0xFF4A7C59); // Zen green
+  Color _currentVibeColor = AppTheme.primaryZen; // Default, will be loaded from ThemeManagerService
 
   final ThemeManagerService _themeManager = ThemeManagerService();
   final Random _random = Random();
@@ -484,13 +485,13 @@ class _VibeQuickSelector extends StatelessWidget {
     final vibes = [
       {
         'name': 'Zen',
-        'color': const Color(0xFF4A7C59),
+        'color': AppTheme.primaryZen,
         'icon': 'self_improvement'
       },
-      {'name': 'Energized', 'color': const Color(0xFFE8B86D), 'icon': 'bolt'},
+      {'name': 'Energized', 'color': AppTheme.primaryEnergy, 'icon': 'bolt'},
       {
         'name': 'Reflective',
-        'color': const Color(0xFF6B73FF),
+        'color': AppTheme.primaryReflection,
         'icon': 'psychology'
       },
       {

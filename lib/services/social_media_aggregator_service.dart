@@ -82,7 +82,7 @@ class SocialMediaAggregatorService {
 
       await _bigQueryService.streamSocialMediaData(events);
     } catch (e) {
-      print('Failed to stream data to BigQuery: $e');
+      // Error handled silently
     }
   }
 
