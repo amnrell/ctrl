@@ -1,0 +1,23 @@
+// Fix for usage_stats plugin lStar attribute issue
+// This script ensures all plugins use compileSdk 35
+
+allprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileSdkVersion 35
+                if (project.android.hasProperty('defaultConfig')) {
+                    project.android.defaultConfig {
+                        if (hasProperty('minSdkVersion')) {
+                            minSdkVersion 23
+                        }
+                        if (hasProperty('targetSdkVersion')) {
+                            targetSdkVersion 35
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

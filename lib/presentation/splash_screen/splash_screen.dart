@@ -7,6 +7,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../services/theme_manager_service.dart';
+import '../../utils/responsive_helper.dart';
 
 /// Splash Screen with logo animation
 /// Features subtle glitch effects and dynamic color theming
@@ -227,19 +228,22 @@ class _SplashScreenState extends State<SplashScreen>
 
             // Main content
             SafeArea(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(flex: 2),
-                    _buildLogo(theme),
-                    const SizedBox(height: 48),
-                    _buildLoadingIndicator(theme),
-                    const Spacer(flex: 3),
-                    _buildInitializationStatus(theme),
-                    const SizedBox(height: 32),
-                  ],
+              child: ResponsiveHelper.wrapWithMaxWidth(
+                context,
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 2),
+                      _buildLogo(theme),
+                      SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 4.0, tablet: 5.0, desktop: 6.0)),
+                      _buildLoadingIndicator(theme),
+                      const Spacer(flex: 3),
+                      _buildInitializationStatus(theme),
+                      SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 3.0, tablet: 4.0, desktop: 5.0)),
+                    ],
+                  ),
                 ),
               ),
             ),

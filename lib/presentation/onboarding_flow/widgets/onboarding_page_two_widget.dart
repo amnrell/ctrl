@@ -37,15 +37,15 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 6.h),
+            SizedBox(height: 2.h),
 
             // Title
             Text(
               'Privacy First',
               style: theme.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurface,
-              ),
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 25),
               textAlign: TextAlign.center,
             ),
 
@@ -56,12 +56,13 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               'We need a few permissions to help you take control of your digital wellbeing',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                height: 1.5,
+                height: 1.4,
+                fontSize: 12.sp,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 6.h),
+            SizedBox(height: 2.h),
 
             // Permission items
             _buildPermissionItem(
@@ -71,7 +72,7 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               'Track usage time across your social apps',
               'Required for analytics',
             ),
-            SizedBox(height: 3.h),
+            SizedBox(height: 1.h),
             _buildPermissionItem(
               context,
               Icons.query_stats,
@@ -79,7 +80,7 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               'Analyze your screen time patterns',
               'Helps detect unhealthy habits',
             ),
-            SizedBox(height: 3.h),
+            SizedBox(height: 1.h),
             _buildPermissionItem(
               context,
               Icons.notifications_active,
@@ -87,12 +88,10 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               'Remind you about breaks and goals',
               'Optional - you control frequency',
             ),
-
-            SizedBox(height: 6.h),
-
+            SizedBox(height: 1.h),
             // Privacy assurance
             Container(
-              padding: EdgeInsets.all(4.w),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
               decoration: BoxDecoration(
                 color: vibeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
@@ -115,15 +114,15 @@ class OnboardingPageTwoWidget extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color:
                             theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                        height: 1.4,
+                        height: 1.3,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            const Spacer(flex: 2),
+            SizedBox(height: 9.h),
+            const Spacer(),
           ],
         ),
       ),
@@ -174,24 +173,23 @@ class OnboardingPageTwoWidget extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
                   description,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 13),
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
                   benefit,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: vibeColor,
-                    fontStyle: FontStyle.italic,
-                  ),
+                      color: vibeColor,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12),
                 ),
               ],
             ),

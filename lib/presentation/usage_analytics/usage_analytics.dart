@@ -6,6 +6,7 @@ import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import '../../widgets/custom_image_widget.dart';
+import '../../utils/responsive_helper.dart';
 
 /// Enhanced analytics page with social media platform tracking
 class UsageAnalytics extends StatefulWidget {
@@ -189,9 +190,11 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
         vibeColor: theme.colorScheme.primary,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(4.w),
-          child: Column(
+        child: ResponsiveHelper.wrapWithMaxWidth(
+          context,
+          Padding(
+            padding: ResponsiveHelper.getScreenPadding(context),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Tracked Platforms Summary
@@ -284,17 +287,20 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
               // Platform Breakdown
               _buildPlatformBreakdown(theme),
             ],
+            ),
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomBar(
-        currentRoute: '/usage-analytics',
-        onNavigate: (route) {
-          if (route != '/usage-analytics') {
-            Navigator.pushNamed(context, route);
-          }
-        },
-      ),
+      bottomNavigationBar: ResponsiveHelper.shouldShowBottomNav(context)
+          ? CustomBottomBar(
+              currentRoute: '/usage-analytics',
+              onNavigate: (route) {
+                if (route != '/usage-analytics') {
+                  Navigator.pushNamed(context, route);
+                }
+              },
+            )
+          : null,
     );
   }
 

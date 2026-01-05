@@ -3,8 +3,8 @@ import 'package:sizer/sizer.dart';
 import 'dart:math';
 
 import '../../core/app_export.dart';
-import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
+import '../../utils/responsive_helper.dart';
 import './widgets/ai_recommendation_banner_widget.dart';
 import './widgets/dynamic_background_widget.dart';
 import './widgets/greeting_header_widget.dart';
@@ -216,8 +216,11 @@ class _MainDashboardState extends State<MainDashboard>
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      appBar: CustomAppBar(
-        titleWidget: _buildAnimatedCtrlTitle(theme),
+      
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: _buildAnimatedCtrlTitle(theme),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: CustomIconWidget(
@@ -249,70 +252,91 @@ class _MainDashboardState extends State<MainDashboard>
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Greeting header with vibe-specific message
-                      GreetingHeaderWidget(
-                        currentTime: DateTime.now(),
-                        vibeColor: _currentVibeColor,
-                        currentVibe: _currentVibe,
-                      ),
-
-                      SizedBox(height: 3.h),
-
-                      // Vibe indicator card with emotional state
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/vibe-selection');
-                        },
-                        child: VibeIndicatorCardWidget(
-                          currentVibe: _currentVibe,
+                child: ResponsiveHelper.wrapWithMaxWidth(
+                  context,
+                  Padding(
+                    padding: ResponsiveHelper.getScreenPadding(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Greeting header with vibe-specific message
+                        GreetingHeaderWidget(
+                          currentTime: DateTime.now(),
                           vibeColor: _currentVibeColor,
+                          currentVibe: _currentVibe,
                         ),
-                      ),
 
-                      SizedBox(height: 3.h),
+                        SizedBox(height: ResponsiveHelper.getSpacing(context)),
 
-                      // AI recommendation banner with vibe-specific suggestions
-                      if (_showAiRecommendation)
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 2.h),
-                          child: AiRecommendationBannerWidget(
-                            message: _aiRecommendationMessage,
+                        // Vibe indicator card with emotional state
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/vibe-selection');
+                          },
+                          child: VibeIndicatorCardWidget(
+                            currentVibe: _currentVibe,
                             vibeColor: _currentVibeColor,
-                            onTap: () {
-                              Navigator.pushNamed(context, '/ctrl-center');
-                            },
-                            onDismiss: () {
-                              setState(() {
-                                _showAiRecommendation = false;
-                              });
-                            },
                           ),
                         ),
 
-                      // Section header
-                      Text(
-                        'Today\'s Usage',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                        SizedBox(height: ResponsiveHelper.getSpacing(context)),
+
+                        // AI recommendation banner with vibe-specific suggestions
+                        if (_showAiRecommendation)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              bottom: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0),
+                            ),
+                            child: AiRecommendationBannerWidget(
+                              message: _aiRecommendationMessage,
+                              vibeColor: _currentVibeColor,
+                              onTap: () {
+                                Navigator.pushNamed(context, '/ctrl-center');
+                              },
+                              onDismiss: () {
+                                setState(() {
+                                  _showAiRecommendation = false;
+                                });
+                              },
+                            ),
+                          ),
+
+                        // Section header
+                        Text(
+                          'Today\'s Usage',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontSize: ResponsiveHelper.isDesktop(context) ? 28 : null,
+                          ),
                         ),
-                      ),
 
-                      SizedBox(height: 2.h),
+                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
 
-                      // Usage summary cards
-                      UsageSummaryCardWidget(
-                        usageData: _usageData,
-                        vibeColor: _currentVibeColor,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/usage-analytics');
-                        },
-                      ),
-                    ],
+                        // Usage summary cards - responsive grid layout for web
+                        ResponsiveHelper.isDesktop(context)
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: UsageSummaryCardWidget(
+                                      usageData: _usageData,
+                                      vibeColor: _currentVibeColor,
+                                      onTap: () {
+                                        Navigator.pushNamed(context, '/usage-analytics');
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : UsageSummaryCardWidget(
+                                usageData: _usageData,
+                                vibeColor: _currentVibeColor,
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/usage-analytics');
+                                },
+                              ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -320,10 +344,12 @@ class _MainDashboardState extends State<MainDashboard>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showVibeSelector,
-        backgroundColor: _currentVibeColor,
-        icon: CustomIconWidget(
+      floatingActionButton: ResponsiveHelper.isDesktop(context)
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _showVibeSelector,
+              backgroundColor: _currentVibeColor,
+              icon: CustomIconWidget(
           iconName: 'psychology',
           color: theme.colorScheme.surface,
           size: 24,
@@ -335,15 +361,17 @@ class _MainDashboardState extends State<MainDashboard>
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomBar(
-        currentRoute: '/main-dashboard',
-        vibeColor: _currentVibeColor,
-        onNavigate: (route) {
-          if (route != '/main-dashboard') {
-            Navigator.pushNamed(context, route);
-          }
-        },
-      ),
+      bottomNavigationBar: ResponsiveHelper.shouldShowBottomNav(context)
+          ? CustomBottomBar(
+              currentRoute: '/main-dashboard',
+              vibeColor: _currentVibeColor,
+              onNavigate: (route) {
+                if (route != '/main-dashboard') {
+                  Navigator.pushNamed(context, route);
+                }
+              },
+            )
+          : null,
     );
   }
 

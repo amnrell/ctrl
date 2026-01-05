@@ -5,6 +5,7 @@ import 'package:sizer/sizer.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../services/theme_manager_service.dart';
 import '../../services/data_compliance_service.dart';
+import '../../utils/responsive_helper.dart';
 import './widgets/theme_customization_section_widget.dart';
 import './widgets/font_customization_section_widget.dart';
 import './widgets/data_privacy_section_widget.dart';

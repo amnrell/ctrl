@@ -85,7 +85,7 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
               },
             ),
 
-            SizedBox(height: 6.h),
+            SizedBox(height: 2.h),
 
             // Welcome title
             ShaderMask(
@@ -96,9 +96,9 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
                 ],
               ).createShader(bounds),
               child: Text(
-                'Welcome to CTRL',
+                'Welcome to\nCTRL',
                 style: GoogleFonts.inter(
-                  fontSize: 32.sp,
+                  fontSize: 25.sp,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                   letterSpacing: 1.5,
@@ -115,6 +115,7 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w600,
+                fontSize: 16.sp,
               ),
               textAlign: TextAlign.center,
             ),
@@ -125,12 +126,13 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
               'Monitor social media usage, understand your emotional patterns, and make mindful decisions about your screen time',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                height: 1.5,
+                height: 1.4,
+                fontSize: 12.sp,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 6.h),
+            SizedBox(height: 2.h),
 
             // Feature highlights
             _buildFeatureHighlight(
@@ -153,7 +155,7 @@ class _OnboardingPageOneWidgetState extends State<OnboardingPageOneWidget>
               'Mindful Control',
               'Set boundaries that work for you',
             ),
-
+            SizedBox(height:13.h),
             const Spacer(flex: 2),
           ],
         ),

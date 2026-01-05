@@ -64,7 +64,7 @@ class OnboardingPageThreeWidget extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
         child: Column(
           children: [
-            SizedBox(height: 4.h),
+            SizedBox(height: 2.h),
 
             // Title
             Text(
@@ -83,11 +83,12 @@ class OnboardingPageThreeWidget extends StatelessWidget {
               'Select your current vibe. You can change this anytime.',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                fontSize: 12.sp,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 4.h),
+            SizedBox(height: 3.h),
 
             // Vibe grid
             Expanded(
@@ -213,7 +214,7 @@ class OnboardingPageThreeWidget extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 8.h),
+            SizedBox(height: 10.h),
           ],
         ),
       ),
