@@ -183,7 +183,7 @@ class _SplashScreenState extends State<SplashScreen>
   void _navigateToNextScreen() {
     // Navigate to AuthGate or Dashboard based on authentication state
     // For now, navigate to dashboard (AuthGate will be added in PRIORITY 2)
-    Navigator.pushReplacementNamed(context, '/main-dashboard');
+    Navigator.pushReplacementNamed(context, '/signIn');    //main-dashboard
   }
 
   @override

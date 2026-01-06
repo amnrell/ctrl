@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1073361864986",
+    "project_id": "ctrl-e1946",
+    "storage_bucket": "ctrl-e1946.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1073361864986:android:ce6b5c2527ce48843104a3",
+        "android_client_info": {
+          "package_name": "com.ctrl.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1073361864986-1fbvnf8lgvnb8tr04kp1coobu997f9he.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ctrl.app",
+            "certificate_hash": "4b4a3273533b10d6d7ca795d6c12ad140a681940"
+          }
+        },
+        {
+          "client_id": "1073361864986-9n0nijtneqtpj9og59f8hknrabikttl6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADMi3dpdupJPggTut07CZQvTW2oCp1jN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1073361864986-9n0nijtneqtpj9og59f8hknrabikttl6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
