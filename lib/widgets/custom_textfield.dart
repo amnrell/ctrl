@@ -108,7 +108,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField>
   Widget build(BuildContext context) {
     final primaryColor = _currentVibeColor;
     return TextFormField(
-      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 15),
+      style: TextStyle(color: primaryColor, fontSize: 15),
       controller: widget.ctrl,
       keyboardType: widget.keyboardType,
       textInputAction:

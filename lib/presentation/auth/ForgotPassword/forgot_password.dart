@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../services/theme_manager_service.dart';
+import '../../../services/firebase_auth_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_image_widget.dart';
 import '../../../widgets/custom_textfield.dart';
@@ -19,14 +20,16 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     with SingleTickerProviderStateMixin {
   bool isFormSubmitted = false;
+  bool _isLoading = false;
+  bool _emailSent = false;
   final _forgotpasswordFormKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
   String fcmToken = '';
   final ThemeManagerService _themeManager = ThemeManagerService();
+  final FirebaseAuthService _authService = FirebaseAuthService();
   Color _currentVibeColor = AppTheme.primaryZen;
 
   @override
@@ -64,6 +67,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
   @override
   void dispose() {
     _pulseController.dispose();
+    emailController.dispose();
     _themeManager.removeListener(() {});
     super.dispose();
   }
@@ -138,7 +142,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Forgot Password",
+                                _emailSent ? "Check Your Email" : "Forgot Password",
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontSize: ResponsiveHelper.isDesktop(context)
@@ -151,7 +155,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                                   height: ResponsiveHelper.getSpacing(context,
                                       mobile: 1.5, tablet: 2.0, desktop: 2.0)),
                               Text(
-                                "Please enter your email address to receive\nyour password reset link",
+                                _emailSent
+                                    ? "We've sent a password reset link to\n${emailController.text}\n\nPlease check your email and follow the instructions to reset your password."
+                                    : "Please enter your email address to receive\nyour password reset link",
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontSize: ResponsiveHelper.isDesktop(context)
@@ -159,57 +165,64 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                                       : 12,
                                 ),
                               ),
-                              SizedBox(
-                                  height: ResponsiveHelper.getSpacing(context,
-                                      mobile: 3.0, tablet: 3.5, desktop: 4.0)),
-                              SizedBox(
-                                width: ResponsiveHelper.isDesktop(context)
-                                    ? 600
-                                    : double.infinity,
-                                child: CustomTextFormField(
-                                  hintText: 'Email',
-                                  maxLines: 1,
-                                  ctrl: emailController,
-                                  name: "email",
-                                  formSubmitted: isFormSubmitted,
-                                  validationMsg: 'Please enter email',
+                              if (!_emailSent) ...[
+                                SizedBox(
+                                    height: ResponsiveHelper.getSpacing(context,
+                                        mobile: 3.0, tablet: 3.5, desktop: 4.0)),
+                                SizedBox(
+                                  width: ResponsiveHelper.isDesktop(context)
+                                      ? 600
+                                      : double.infinity,
+                                  child: CustomTextFormField(
+                                    hintText: 'Email',
+                                    maxLines: 1,
+                                    ctrl: emailController,
+                                    name: "email",
+                                    formSubmitted: isFormSubmitted,
+                                    validationMsg: 'Please enter email',
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                           SizedBox(
                               height: ResponsiveHelper.getSpacing(context,
                                   mobile: 3.0, tablet: 3.5, desktop: 4.0)),
-                          SizedBox(
-                            width: ResponsiveHelper.isDesktop(context)
-                                ? 600
-                                : double.infinity,
-                            height: ResponsiveHelper.getButtonHeight(context),
-                            child: CupertinoButton(
-                              borderRadius: BorderRadius.circular(25),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              color: primaryColor,
-                              onPressed: () {
-                                // Handle forgot password logic here
-                                if (_forgotpasswordFormKey.currentState
-                                        ?.validate() ??
-                                    false) {
-                                  // Implement password reset logic
-                                }
-                              },
-                              child: Text(
-                                "Reset Password",
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: theme.colorScheme.surface,
-                                  letterSpacing: 1.5,
-                                  fontSize: ResponsiveHelper.isDesktop(context)
-                                      ? 18
-                                      : 17,
-                                ),
+                          if (!_emailSent)
+                            SizedBox(
+                              width: ResponsiveHelper.isDesktop(context)
+                                  ? 600
+                                  : double.infinity,
+                              height: ResponsiveHelper.getButtonHeight(context),
+                              child: CupertinoButton(
+                                borderRadius: BorderRadius.circular(25),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                color: primaryColor,
+                                onPressed: _isLoading ? null : _handlePasswordReset,
+                                child: _isLoading
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            theme.colorScheme.surface,
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        "Send Reset Link",
+                                        style: theme.textTheme.labelLarge?.copyWith(
+                                          color: theme.colorScheme.surface,
+                                          letterSpacing: 1.5,
+                                          fontSize: ResponsiveHelper.isDesktop(context)
+                                              ? 18
+                                              : 17,
+                                        ),
+                                      ),
                               ),
                             ),
-                          ),
                           SizedBox(
                               height: ResponsiveHelper.getSpacing(context,
                                   mobile: 2.0, tablet: 2.5, desktop: 3.0)),
@@ -260,5 +273,61 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
         ],
       ),
     );
+  }
+
+  Future<void> _handlePasswordReset() async {
+    // Validate form
+    if (!_forgotpasswordFormKey.currentState!.validate()) {
+      setState(() {
+        isFormSubmitted = true;
+      });
+      return;
+    }
+
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _isLoading = true;
+      isFormSubmitted = true;
+    });
+
+    try {
+      await _authService.sendPasswordResetEmail(
+        email: emailController.text.trim(),
+      );
+
+      if (mounted) {
+        setState(() {
+          _emailSent = true;
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Password reset email sent successfully!'),
+            backgroundColor: _currentVibeColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        final errorMessage = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 }

@@ -1,3 +1,6 @@
+import 'package:ctrl/presentation/auth/SIgnin/signin.dart';
+import 'package:ctrl/utils/constant.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
@@ -57,10 +60,9 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
           content: Text(
             success ? 'Data exported successfully' : 'Failed to export data',
           ),
-          backgroundColor:
-              success
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
+          backgroundColor: success
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -151,7 +153,34 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
               ],
             ),
           ),
-
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  await getStorage.write('isLogin', 0);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignInPage()),
+                    (route) => false,
+                  );
+                },
+                icon: Icon(Icons.logout, size: 20),
+                label: Text('Log out'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.error,
+                  foregroundColor: theme.colorScheme.onError,
+                  padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 2.h),
           Divider(
             height: 1,
             color: theme.colorScheme.outline.withValues(alpha: 0.1),

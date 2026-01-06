@@ -37,6 +37,13 @@
             {
               "client_id": "1073361864986-9n0nijtneqtpj9og59f8hknrabikttl6.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1073361864986-qv4q2uoq1esjarpo9fg1qfami5lk2e1u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ctrl.app"
+              }
             }
           ]
         }

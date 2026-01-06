@@ -7,6 +7,8 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../services/theme_manager_service.dart';
+import '../../services/firebase_auth_service.dart';
+import '../../utils/constant.dart';
 import '../../utils/responsive_helper.dart';
 
 /// Splash Screen with logo animation
@@ -29,6 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
   final Random _random = Random();
   final ThemeManagerService _themeManager = ThemeManagerService();
   bool _isInitializing = true;
+  bool _isAuthenticated = false;
   Color _primaryVibeColor = const Color(0xFF4A7C59); // Default Zen
 
   // Glitch effect parameters
@@ -122,7 +125,6 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _initializeApp() async {
     try {
       await Future.wait([
-        _checkAuthentication(),
         _loadVibePreferences(),
         _syncUsageData(),
         _prepareAIContext(),
@@ -132,7 +134,9 @@ class _SplashScreenState extends State<SplashScreen>
       // Also ensure logo animation completes
       await Future.wait([
         Future.delayed(const Duration(seconds: 2)),
-        _logoScaleController.forward().then((_) => Future.delayed(const Duration(milliseconds: 500))),
+        _logoScaleController
+            .forward()
+            .then((_) => Future.delayed(const Duration(milliseconds: 500))),
       ]);
 
       if (mounted) {
@@ -164,10 +168,6 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
-  Future<void> _checkAuthentication() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-  }
-
   Future<void> _loadVibePreferences() async {
     await Future.delayed(const Duration(milliseconds: 600));
   }
@@ -181,9 +181,15 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToNextScreen() {
-    // Navigate to AuthGate or Dashboard based on authentication state
-    // For now, navigate to dashboard (AuthGate will be added in PRIORITY 2)
-    Navigator.pushReplacementNamed(context, '/signIn');    //main-dashboard
+    // Navigate based on authentication state
+    var IsLogin = getStorage.read('isLogin') ?? 0;
+    if (IsLogin == 1) {
+      // User is logged in, go to dashboard
+      Navigator.pushReplacementNamed(context, '/main-dashboard');
+    } else {
+      // User is not logged in, go to sign in screen
+      Navigator.pushReplacementNamed(context, '/signIn');
+    }
   }
 
   @override
@@ -237,11 +243,15 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       const Spacer(flex: 2),
                       _buildLogo(theme),
-                      SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 4.0, tablet: 5.0, desktop: 6.0)),
+                      SizedBox(
+                          height: ResponsiveHelper.getSpacing(context,
+                              mobile: 4.0, tablet: 5.0, desktop: 6.0)),
                       _buildLoadingIndicator(theme),
                       const Spacer(flex: 3),
                       _buildInitializationStatus(theme),
-                      SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 3.0, tablet: 4.0, desktop: 5.0)),
+                      SizedBox(
+                          height: ResponsiveHelper.getSpacing(context,
+                              mobile: 3.0, tablet: 4.0, desktop: 5.0)),
                     ],
                   ),
                 ),
@@ -363,19 +373,18 @@ class _SplashScreenState extends State<SplashScreen>
         SizedBox(
           width: 2.h,
           height: 2.h,
-          child:
-              isLoading
-                  ? CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _primaryVibeColor.withValues(alpha: 0.5),
-                    ),
-                  )
-                  : CustomIconWidget(
-                    iconName: 'check_circle',
-                    color: _primaryVibeColor,
-                    size: 2.h,
+          child: isLoading
+              ? CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _primaryVibeColor.withValues(alpha: 0.5),
                   ),
+                )
+              : CustomIconWidget(
+                  iconName: 'check_circle',
+                  color: _primaryVibeColor,
+                  size: 2.h,
+                ),
         ),
         SizedBox(width: 2.w),
         Text(
@@ -398,11 +407,10 @@ class _SubtleGridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color.withValues(alpha: 0.03)
-          ..strokeWidth = 1
-          ..style = PaintingStyle.stroke;
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.03)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
 
     // Draw vertical lines
     for (double x = 0; x < size.width; x += 40) {
@@ -416,7 +424,8 @@ class _SubtleGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SubtleGridPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_SubtleGridPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// Custom painter for scan line effect
@@ -428,10 +437,9 @@ class _ScanLinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = 2;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2;
 
     final y = size.height * position;
 
@@ -439,17 +447,16 @@ class _ScanLinePainter extends CustomPainter {
     canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
 
     // Fading trail
-    final gradientPaint =
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              color.withValues(alpha: 0),
-              color,
-              color.withValues(alpha: 0),
-            ],
-          ).createShader(Rect.fromLTWH(0, y - 20, size.width, 40));
+    final gradientPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color.withValues(alpha: 0),
+          color,
+          color.withValues(alpha: 0),
+        ],
+      ).createShader(Rect.fromLTWH(0, y - 20, size.width, 40));
 
     canvas.drawRect(Rect.fromLTWH(0, y - 20, size.width, 40), gradientPaint);
   }

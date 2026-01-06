@@ -1,14 +1,19 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../theme/app_theme.dart';
+import '../../../utils/constant.dart';
 import '../../../widgets/custom_image_widget.dart';
 import '../../../widgets/custom_textfield.dart';
 import '../../../widgets/social_login_widget.dart';
 import '../../../utils/responsive_helper.dart';
 import '../../main_dashboard/widgets/dynamic_background_widget.dart';
 import '../../../services/theme_manager_service.dart';
+import '../../../services/firebase_auth_service.dart';
 
 class SignInPage extends StatefulWidget {
   final String? logincheck;
@@ -22,14 +27,17 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage>
     with SingleTickerProviderStateMixin {
   bool isFormSubmitted = false;
+  bool _isLoading = false;
+  bool _isSignUpMode = false;
   final _loginFormKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController(); //
+  TextEditingController passwordController = TextEditingController();
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
   String fcmToken = '';
   final ThemeManagerService _themeManager = ThemeManagerService();
+  final FirebaseAuthService _authService = FirebaseAuthService();
   Color _currentVibeColor = AppTheme.primaryZen;
 
   @override
@@ -75,7 +83,7 @@ class _SignInPageState extends State<SignInPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = _currentVibeColor;
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: Stack(
@@ -98,7 +106,10 @@ class _SignInPageState extends State<SignInPage>
                     padding: ResponsiveHelper.getScreenPadding(context),
                     child: Column(
                       children: [
-                        SizedBox(height: ResponsiveHelper.isDesktop(context) ? 2.h : 4.h),
+                        SizedBox(
+                            height: ResponsiveHelper.isDesktop(context)
+                                ? 2.h
+                                : 4.h),
                         AnimatedBuilder(
                           animation: _pulseAnimation,
                           builder: (context, child) {
@@ -129,17 +140,24 @@ class _SignInPageState extends State<SignInPage>
                             );
                           },
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
                         Text(
-                          "Welcome Back",
+                          _isSignUpMode ? "Create Account" : "Welcome Back",
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: theme.colorScheme.onSurface,
-                            fontSize: ResponsiveHelper.isDesktop(context) ? 28 : null,
+                            fontSize:
+                                ResponsiveHelper.isDesktop(context) ? 28 : null,
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
                         SizedBox(
-                          width: ResponsiveHelper.isDesktop(context) ? 600 : double.infinity,
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SizedBox(
+                          width: ResponsiveHelper.isDesktop(context)
+                              ? 600
+                              : double.infinity,
                           child: CustomTextFormField(
                             hintText: 'Email',
                             maxLines: 1,
@@ -149,9 +167,13 @@ class _SignInPageState extends State<SignInPage>
                             validationMsg: 'Please enter email',
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 1.5, tablet: 2.0, desktop: 2.0)),
                         SizedBox(
-                          width: ResponsiveHelper.isDesktop(context) ? 600 : double.infinity,
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 1.5, tablet: 2.0, desktop: 2.0)),
+                        SizedBox(
+                          width: ResponsiveHelper.isDesktop(context)
+                              ? 600
+                              : double.infinity,
                           child: CustomTextFormField(
                             hintText: 'Password',
                             maxLines: 1,
@@ -161,75 +183,157 @@ class _SignInPageState extends State<SignInPage>
                             validationMsg: 'Please enter password',
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
                         SizedBox(
-                          width: ResponsiveHelper.isDesktop(context) ? 600 : double.infinity,
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SizedBox(
+                          width: ResponsiveHelper.isDesktop(context)
+                              ? 600
+                              : double.infinity,
                           height: ResponsiveHelper.getButtonHeight(context),
                           child: CupertinoButton(
                             borderRadius: BorderRadius.circular(25),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                             color: primaryColor,
-                            onPressed: onLoginButtonPress,
-                            child: Text(
-                              'Login',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.surface,
-                                letterSpacing: 1.5,
-                                fontSize: ResponsiveHelper.isDesktop(context) ? 18 : 17,
-                              ),
-                            ),
+                            onPressed: _isLoading ? null : onLoginButtonPress,
+                            child: _isLoading
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        theme.colorScheme.surface,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    'Login',
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color: theme.colorScheme.surface,
+                                      letterSpacing: 1.5,
+                                      fontSize:
+                                          ResponsiveHelper.isDesktop(context)
+                                              ? 18
+                                              : 17,
+                                    ),
+                                  ),
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           onPressed: () {
                             Navigator.pushNamed(context, '/forgot-password');
                           },
                           child: Text(
-                        "Forgot your Password?",
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                          fontSize: ResponsiveHelper.isDesktop(context) ? 16 : 14,
-                          fontWeight: FontWeight.w400,
+                            "Forgot your Password?",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontSize:
+                                  ResponsiveHelper.isDesktop(context) ? 16 : 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
                         SizedBox(
-                          width: ResponsiveHelper.isDesktop(context) ? 230 : 80,
-                          child: Divider(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: ResponsiveHelper.isDesktop(context)
+                                  ? 230
+                                  : 80,
+                              child: Divider(
                                 thickness: 1,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.2),
                               ),
                             ),
-                            SizedBox(width: ResponsiveHelper.isDesktop(context) ? 15 : 10),
+                            SizedBox(
+                                width: ResponsiveHelper.isDesktop(context)
+                                    ? 15
+                                    : 10),
                             Text(
                               "Or",
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurface,
-                                fontSize: ResponsiveHelper.isDesktop(context) ? 16 : 15,
+                                fontSize: ResponsiveHelper.isDesktop(context)
+                                    ? 16
+                                    : 15,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            SizedBox(width: ResponsiveHelper.isDesktop(context) ? 15 : 10),
                             SizedBox(
-                              width: ResponsiveHelper.isDesktop(context) ? 230 : 80,
+                                width: ResponsiveHelper.isDesktop(context)
+                                    ? 15
+                                    : 10),
+                            SizedBox(
+                              width: ResponsiveHelper.isDesktop(context)
+                                  ? 230
+                                  : 80,
                               child: Divider(
                                 thickness: 1,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.2),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
-                        SocialLoginPage(
-                          loginCheck: widget.logincheck,
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _isSignUpMode
+                                  ? "Already have an account?"
+                                  : "Don't have an account?",
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontSize: ResponsiveHelper.isDesktop(context)
+                                    ? 16
+                                    : 14,
+                              ),
+                            ),
+                            CupertinoButton(
+                              padding: const EdgeInsets.only(left: 4),
+                              onPressed: () {
+                                setState(() {
+                                  _isSignUpMode = !_isSignUpMode;
+                                  isFormSubmitted = false;
+                                });
+                              },
+                              child: Text(
+                                _isSignUpMode ? "Sign In" : "Sign Up",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: primaryColor,
+                                  fontSize: ResponsiveHelper.isDesktop(context)
+                                      ? 16
+                                      : 14,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        // SizedBox(
+                        //     height: ResponsiveHelper.getSpacing(context,
+                        //         mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        // SocialLoginPage(
+                        //   loginCheck: widget.logincheck,
+                        // ),
+                        // SizedBox(
+                        //     height: ResponsiveHelper.getSpacing(context,
+                        //         mobile: 2.0, tablet: 2.5, desktop: 3.0)),
                       ],
                     ),
                   ),
@@ -242,20 +346,145 @@ class _SignInPageState extends State<SignInPage>
     );
   }
 
-  onLoginButtonPress() {
-    Navigator.pushReplacementNamed(context, '/main-dashboard');
+  Future<void> onLoginButtonPress() async {
+    // Validate form
+    if (!_loginFormKey.currentState!.validate()) {
+      setState(() {
+        isFormSubmitted = true;
+      });
+      return;
+    }
+
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
     setState(() {
+      _isLoading = true;
       isFormSubmitted = true;
     });
-    // FocusScope.of(context).requestFocus(FocusNode());
-    // Future.delayed(const Duration(milliseconds: 100), () async {
-    //   if (_loginFormKey.currentState!.validate()) {
-    //     loginController.email(emailController.text);
-    //     loginController.password(passwordController.text);
-    //     loginController.fcmToken(fcmToken);
-    //     LoaderX.show(context, 60.0, 60.0);
-    //     loginController.login();
-    //   }
-    // });
+
+    try {
+      // Sign in with email and password
+      final userCredential = await _authService.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      if (userCredential.user != null) {
+        try {
+          await getStorage.write('isLogin', 1);
+        } catch (storageError) {
+          debugPrint('Storage error: $storageError');
+        }
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main-dashboard');
+        }
+      } else {
+        throw Exception('Login failed: User credential is null');
+      }
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
+      if (mounted) {
+        String errorMessage = _getFirebaseErrorMessage(e);
+        debugPrint('Firebase Auth Error: ${e.code} - ${e.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle all other errors including type casting errors
+      debugPrint('Login Error: $e');
+
+      // Workaround for Firebase Android Pigeon serialization bug:
+      // Sometimes auth succeeds but throws a type casting error.
+      // Check if user is actually signed in before showing error.
+
+      // Wait a moment for auth state to update
+      await Future.delayed(const Duration(milliseconds: 500));
+      final currentUser = _authService.currentUser;
+
+      if (currentUser != null &&
+          currentUser.email == emailController.text.trim()) {
+        debugPrint('Auth succeeded despite serialization error. Proceeding...');
+        // User is actually signed in, proceed with login
+        try {
+          await getStorage.write('isLogin', 1);
+        } catch (storageError) {
+          debugPrint('Storage error: $storageError');
+          // Continue even if storage fails
+        }
+
+        if (mounted) {
+          // Show success message instead of error
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Login successful!'),
+              backgroundColor: _currentVibeColor,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          Navigator.pushReplacementNamed(context, '/main-dashboard');
+          return; // Exit early, login succeeded
+        }
+      }
+
+      // Show error message only if login actually failed
+      if (mounted) {
+        String errorMessage = _getErrorMessage(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String _getFirebaseErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No account found with this email address. Please check your email or sign up.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again or use "Forgot Password" to reset.';
+      case 'invalid-email':
+        return 'The email address is invalid. Please check and try again.';
+      case 'user-disabled':
+        return 'This account has been disabled. Please contact support.';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please try again later or reset your password.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection and try again.';
+      case 'operation-not-allowed':
+        return 'Email/password sign-in is not enabled. Please contact support.';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please check your credentials and try again.';
+      default:
+        return e.message ??
+            'An authentication error occurred. Please try again.';
+    }
+  }
+
+  String _getErrorMessage(dynamic e) {
+    final errorString = e.toString();
+
+    // Return the error message or a generic one
+    return errorString.isNotEmpty
+        ? errorString
+        : 'An unexpected error occurred. Please try again.';
   }
 }
