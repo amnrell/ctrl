@@ -135,8 +135,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField>
             : null,
         suffixIcon: widget.name == "password"
             ? IconButton(
-                splashColor: Colors.black,
-                highlightColor: Colors.black,
+                splashColor: primaryColor,
+                highlightColor: primaryColor,
                 icon: Icon(
                   _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   color: Colors.black,

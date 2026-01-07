@@ -49,7 +49,7 @@ class FirebaseAuthService {
   }) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email.trim(),
+        email: email,
         password: password,
       );
       return userCredential;

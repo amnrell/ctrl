@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../presentation/auth/ForgotPassword/forgot_password.dart';
 import '../presentation/auth/SIgnin/signin.dart';
+import '../presentation/auth/SignUp/signup.dart';
 import '../presentation/ctrl_center/ctrl_center.dart';
 import '../presentation/main_dashboard/main_dashboard.dart';
 import '../presentation/settings_screen/settings_screen.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const String splash = '/splash-screen';
   static const String onboardingFlow = '/onboarding-flow';
   static const String signIn = '/signIn';
+  static const String signUpPage = '/signUp';
   static const String forgotPassword = '/forgot-password';
   static const String usageAnalytics = '/usage-analytics';
   static const String ctrlCenter = '/ctrl-center';
@@ -39,6 +41,7 @@ class AppRoutes {
     splash: (context) => const SplashScreen(),
     onboardingFlow: (context) => const OnboardingFlow(),
     signIn: (context) => const SignInPage(),
+    signUpPage: (context) => const SignUpPage(),
     forgotPassword: (context) => const ForgotPasswordPage(),
     usageAnalytics: (context) => const UsageAnalytics(),
     ctrlCenter: (context) => const CtrlCenter(),

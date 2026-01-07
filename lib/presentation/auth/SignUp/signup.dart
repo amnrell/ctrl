@@ -15,16 +15,16 @@ import '../../main_dashboard/widgets/dynamic_background_widget.dart';
 import '../../../services/theme_manager_service.dart';
 import '../../../services/firebase_auth_service.dart';
 
-class SignInPage extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   final String? logincheck;
   final String? signupcheck;
-  const SignInPage({super.key, this.logincheck = "", this.signupcheck = ""});
+  const SignUpPage({super.key, this.logincheck = "", this.signupcheck = ""});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignUpPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage>
+class _SignInPageState extends State<SignUpPage>
     with SingleTickerProviderStateMixin {
   bool isFormSubmitted = false;
   bool _isLoading = false;
@@ -144,7 +144,7 @@ class _SignInPageState extends State<SignInPage>
                             height: ResponsiveHelper.getSpacing(context,
                                 mobile: 5.0, tablet: 2.5, desktop: 3.0)),
                         Text(
-                          "Welcome Back",
+                          "Create Account",
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: theme.colorScheme.onSurface,
                             fontSize:
@@ -196,7 +196,7 @@ class _SignInPageState extends State<SignInPage>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 24, vertical: 12),
                             color: primaryColor,
-                            onPressed: _isLoading ? null : onLoginButtonPress,
+                            onPressed: _isLoading ? null : onSignUpButtonPress,
                             child: _isLoading
                                 ? SizedBox(
                                     width: 20,
@@ -209,7 +209,7 @@ class _SignInPageState extends State<SignInPage>
                                     ),
                                   )
                                 : Text(
-                                    'Login',
+                                    'SignUp',
                                     style: theme.textTheme.labelLarge?.copyWith(
                                       color: theme.colorScheme.surface,
                                       letterSpacing: 1.5,
@@ -219,24 +219,6 @@ class _SignInPageState extends State<SignInPage>
                                               : 17,
                                     ),
                                   ),
-                          ),
-                        ),
-                        SizedBox(
-                            height: ResponsiveHelper.getSpacing(context,
-                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/forgot-password');
-                          },
-                          child: Text(
-                            "Forgot your Password?",
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface,
-                              fontSize:
-                                  ResponsiveHelper.isDesktop(context) ? 16 : 14,
-                              fontWeight: FontWeight.w400,
-                            ),
                           ),
                         ),
                         SizedBox(
@@ -300,7 +282,7 @@ class _SignInPageState extends State<SignInPage>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
-                                "Don’t  have an account? ",
+                                "Already have an account? ",
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.black,
@@ -308,10 +290,11 @@ class _SignInPageState extends State<SignInPage>
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.pushNamed(context, '/signUp');
+                                  Navigator.pushReplacementNamed(
+                                      context, '/signIn');
                                 },
                                 child: Text(
-                                  "Signup",
+                                  "Login",
                                   style: TextStyle(
                                       fontSize: 14,
                                       color: primaryColor,
@@ -334,7 +317,7 @@ class _SignInPageState extends State<SignInPage>
     );
   }
 
-  Future<void> onLoginButtonPress() async {
+  Future<void> onSignUpButtonPress() async {
     // Validate form
     if (!_loginFormKey.currentState!.validate()) {
       setState(() {
@@ -354,7 +337,8 @@ class _SignInPageState extends State<SignInPage>
     try {
       UserCredential? userCredential;
 
-      userCredential = await _authService.signInWithEmailAndPassword(
+      // Try to sign in with email and password
+      userCredential = await _authService.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
