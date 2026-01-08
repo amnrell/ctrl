@@ -267,12 +267,12 @@ class _SignInPageState extends State<SignUpPage>
                             ),
                           ],
                         ),
-                        // SizedBox(
-                        //     height: ResponsiveHelper.getSpacing(context,
-                        //         mobile: 2.0, tablet: 2.5, desktop: 3.0)),
-                        // SocialLoginPage(
-                        //   loginCheck: widget.logincheck,
-                        // ),
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SocialLoginPage(
+                          loginCheck: widget.logincheck,
+                        ),
                         SizedBox(
                             height: ResponsiveHelper.getSpacing(context,
                                 mobile: 2.0, tablet: 2.5, desktop: 3.0)),

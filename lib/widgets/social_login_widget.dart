@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../services/theme_manager_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/constant.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: <String>[
@@ -80,51 +81,53 @@ class _SocialLoginPageState extends State<SocialLoginPage>
   Future<void> handleGoogleSignIn() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
-      if (googleSignInAccount != null) {
-        // ignore: use_build_context_synchronously
-        // LoaderX.show(context, 60.0, 60.0);
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
-        setState(() {
-          idToken = googleSignInAuthentication.idToken.toString();
-          accessToken = googleSignInAuthentication.accessToken.toString();
-        });
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-        // await authService.socialLogin(accessToken).then(
-        //   (value) async {
-        //     if (value) {
-        //       await FCMNotificationServices().saveFcmToken(fcmToken).then(
-        //             (value) => {
-        //               if (value)
-        //                 {
-        //                   if (widget.loginCheck == "profile")
-        //                     {
-        //                       LoaderX.hide(),
-        //                       Get.offAll(
-        //                           () => const TabPage(selectedTabIndex: 2)),
-        //                     }
-        //                   else if (widget.loginCheck == "signup")
-        //                     {Get.back(), Get.back()}
-        //                   else
-        //                     {Get.back()}
-        //                 }
-        //             },
-        //           );
-        //     } else {
-        //       LoaderX.hide();
-        //       SnackbarUtils.showErrorSnackbar(
-        //           "Failed to Login", value['message'].toString());
-        //     }
-        //     return null;
-        //   },
-        // );
+      if (googleUser == null) return; // user cancelled login
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+        accessToken: googleAuth.accessToken,
+      );
+
+      // 🔐 Firebase Auth
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+
+      if (user == null) {
+        throw Exception("Google login failed");
       }
-    } catch (error) {
-      // LoaderX.hide();
-      // SnackbarUtils.showErrorSnackbar("Failed to Login", error.toString());
-      throw error.toString();
+
+      // 🔍 CHECK: new user or existing user
+      final bool isNewUser =
+          userCredential.additionalUserInfo?.isNewUser ?? false;
+
+      if (isNewUser) {
+        debugPrint("Existing user Signup");
+      } else {
+        // ✅ Existing user → normal login
+        debugPrint("Existing user logged in");
+      }
+
+      // Save login state
+      await getStorage.write('isLogin', 1);
+      var isFirstTime = getStorage.read('isFirstTime');
+      if (mounted) {
+        if (isFirstTime == null) {
+          getStorage.write('isFirstTime', true);
+          Navigator.pushReplacementNamed(context, '/onboarding-flow');
+        } else {
+          Navigator.pushReplacementNamed(context, '/main-dashboard');
+        }
+      }
+    } catch (e) {
+      debugPrint("Google Sign-In Error: $e");
+      rethrow;
     }
   }
 

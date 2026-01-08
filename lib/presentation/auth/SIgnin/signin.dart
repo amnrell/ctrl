@@ -285,12 +285,12 @@ class _SignInPageState extends State<SignInPage>
                             ),
                           ],
                         ),
-                        // SizedBox(
-                        //     height: ResponsiveHelper.getSpacing(context,
-                        //         mobile: 2.0, tablet: 2.5, desktop: 3.0)),
-                        // SocialLoginPage(
-                        //   loginCheck: widget.logincheck,
-                        // ),
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SocialLoginPage(
+                          loginCheck: widget.logincheck,
+                        ),
                         SizedBox(
                             height: ResponsiveHelper.getSpacing(context,
                                 mobile: 2.0, tablet: 2.5, desktop: 3.0)),
@@ -365,9 +365,14 @@ class _SignInPageState extends State<SignInPage>
         } catch (storageError) {
           debugPrint('Storage error: $storageError');
         }
-
+        var isFirstTime = getStorage.read('isFirstTime');
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/main-dashboard');
+          if (isFirstTime == null) {
+            getStorage.write('isFirstTime', true);
+            Navigator.pushReplacementNamed(context, '/onboarding-flow');
+          } else {
+            Navigator.pushReplacementNamed(context, '/main-dashboard');
+          }
         }
       } else {
         throw Exception('Login failed: User credential is null');

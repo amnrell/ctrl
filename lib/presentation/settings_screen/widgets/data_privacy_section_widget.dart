@@ -2,6 +2,7 @@ import 'package:ctrl/presentation/auth/SIgnin/signin.dart';
 import 'package:ctrl/utils/constant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
@@ -27,7 +28,7 @@ class DataPrivacySectionWidget extends StatefulWidget {
 class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
   Map<String, bool> _permissions = {};
   bool _isLoading = false;
-
+  final _googleSignIn = GoogleSignIn();
   @override
   void initState() {
     super.initState();
@@ -160,6 +161,7 @@ class _DataPrivacySectionWidgetState extends State<DataPrivacySectionWidget> {
               child: ElevatedButton.icon(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
+                  _googleSignIn.disconnect();
                   await getStorage.write('isLogin', 0);
                   Navigator.pushAndRemoveUntil(
                     context,
