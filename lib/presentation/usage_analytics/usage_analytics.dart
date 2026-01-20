@@ -4,7 +4,6 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../../widgets/custom_bottom_bar.dart';
 import '../../widgets/custom_image_widget.dart';
 import '../../utils/responsive_helper.dart';
 
@@ -195,112 +194,102 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
           Padding(
             padding: ResponsiveHelper.getScreenPadding(context),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Tracked Platforms Summary
-              _buildTrackedPlatformsSummary(theme),
-              SizedBox(height: 3.h),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tracked Platforms Summary
+                _buildTrackedPlatformsSummary(theme),
+                SizedBox(height: 3.h),
 
-              // Platform Filter Selector
-              _buildPlatformSelector(theme),
-              SizedBox(height: 3.h),
+                // Platform Filter Selector
+                _buildPlatformSelector(theme),
+                SizedBox(height: 3.h),
 
-              // Chart Type Selector
-              Text(
-                'Chart Type',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                // Chart Type Selector
+                Text(
+                  'Chart Type',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 1.h),
-              Row(
-                children: [
-                  _buildChartTypeButton('Line', theme),
-                  SizedBox(width: 2.w),
-                  _buildChartTypeButton('Bar', theme),
-                  SizedBox(width: 2.w),
-                  _buildChartTypeButton('Pie', theme),
-                ],
-              ),
-              SizedBox(height: 3.h),
-
-              // Chart Title
-              Text(
-                _selectedPlatform == 'All'
-                    ? 'Weekly Total Screen Time'
-                    : '$_selectedPlatform Usage',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 2.h),
-
-              // Chart Container
-              Container(
-                height: 40.h,
-                padding: EdgeInsets.all(4.w),
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: _buildChart(theme),
-              ),
-              SizedBox(height: 2.h),
-
-              // Stats Summary
-              Container(
-                padding: EdgeInsets.all(4.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                SizedBox(height: 1.h),
+                Row(
                   children: [
-                    _buildStatItem(
-                      'Total',
-                      '${_totalWeeklyHours.toStringAsFixed(1)}h',
-                      theme,
-                    ),
-                    _buildStatItem(
-                      'Daily Avg',
-                      '${_averageDailyHours.toStringAsFixed(1)}h',
-                      theme,
-                    ),
-                    _buildStatItem(
-                      'Tracked',
-                      '${_trackedPlatforms.length}',
-                      theme,
-                    ),
+                    _buildChartTypeButton('Line', theme),
+                    SizedBox(width: 2.w),
+                    _buildChartTypeButton('Bar', theme),
+                    SizedBox(width: 2.w),
+                    _buildChartTypeButton('Pie', theme),
                   ],
                 ),
-              ),
-              SizedBox(height: 3.h),
+                SizedBox(height: 3.h),
 
-              // Platform Breakdown
-              _buildPlatformBreakdown(theme),
-            ],
+                // Chart Title
+                Text(
+                  _selectedPlatform == 'All'
+                      ? 'Weekly Total Screen Time'
+                      : '$_selectedPlatform Usage',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+
+                // Chart Container
+                Container(
+                  height: 40.h,
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: _buildChart(theme),
+                ),
+                SizedBox(height: 2.h),
+
+                // Stats Summary
+                Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem(
+                        'Total',
+                        '${_totalWeeklyHours.toStringAsFixed(1)}h',
+                        theme,
+                      ),
+                      _buildStatItem(
+                        'Daily Avg',
+                        '${_averageDailyHours.toStringAsFixed(1)}h',
+                        theme,
+                      ),
+                      _buildStatItem(
+                        'Tracked',
+                        '${_trackedPlatforms.length}',
+                        theme,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 3.h),
+
+                // Platform Breakdown
+                _buildPlatformBreakdown(theme),
+              ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: ResponsiveHelper.shouldShowBottomNav(context)
-          ? CustomBottomBar(
-              currentRoute: '/usage-analytics',
-              onNavigate: (route) {
-                if (route != '/usage-analytics') {
-                  Navigator.pushNamed(context, route);
-                }
-              },
-            )
-          : null,
     );
   }
 
@@ -345,10 +334,9 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
           Wrap(
             spacing: 2.w,
             runSpacing: 1.h,
-            children:
-                _trackedPlatforms
-                    .map((platform) => _buildPlatformChip(platform, theme))
-                    .toList(),
+            children: _trackedPlatforms
+                .map((platform) => _buildPlatformChip(platform, theme))
+                .toList(),
           ),
           if (_trackedPlatforms.isEmpty)
             Text(
@@ -441,10 +429,9 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
     return ElevatedButton(
       onPressed: () => setState(() => _selectedPlatform = name),
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            isSelected
-                ? buttonColor
-                : theme.colorScheme.surfaceContainerHighest,
+        backgroundColor: isSelected
+            ? buttonColor
+            : theme.colorScheme.surfaceContainerHighest,
         foregroundColor:
             isSelected ? Colors.white : theme.colorScheme.onSurface,
         padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
@@ -510,16 +497,14 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
       child: Container(
         padding: EdgeInsets.all(3.w),
         decoration: BoxDecoration(
-          color:
-              isTracked
-                  ? (platform['color'] as Color).withValues(alpha: 0.1)
-                  : theme.colorScheme.surfaceContainerHighest,
+          color: isTracked
+              ? (platform['color'] as Color).withValues(alpha: 0.1)
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color:
-                isTracked
-                    ? platform['color'] as Color
-                    : theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: isTracked
+                ? platform['color'] as Color
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
             width: isTracked ? 2 : 1,
           ),
         ),
@@ -566,10 +551,9 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
                           vertical: 0.5.h,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              isTracked
-                                  ? Colors.green.withValues(alpha: 0.2)
-                                  : Colors.grey.withValues(alpha: 0.2),
+                          color: isTracked
+                              ? Colors.green.withValues(alpha: 0.2)
+                              : Colors.grey.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -622,10 +606,9 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
       child: ElevatedButton(
         onPressed: () => setState(() => _selectedChartType = type),
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.surfaceContainerHighest,
+          backgroundColor: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           foregroundColor:
               isSelected ? Colors.white : theme.colorScheme.onSurface,
           padding: EdgeInsets.symmetric(vertical: 1.5.h),
@@ -655,11 +638,10 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
   }
 
   Widget _buildLineChart(ThemeData theme) {
-    final chartColor =
-        _selectedPlatform == 'All'
-            ? theme.colorScheme.primary
-            : _getPlatformByName(_selectedPlatform)['color'] as Color? ??
-                theme.colorScheme.primary;
+    final chartColor = _selectedPlatform == 'All'
+        ? theme.colorScheme.primary
+        : _getPlatformByName(_selectedPlatform)['color'] as Color? ??
+            theme.colorScheme.primary;
 
     return LineChart(
       LineChartData(
@@ -712,19 +694,17 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
         minX: 0,
         maxX: 6,
         minY: 0,
-        maxY:
-            _weekData
+        maxY: _weekData
                 .map((d) => d['hours'] as double)
                 .reduce((a, b) => a > b ? a : b) +
             1,
         lineBarsData: [
           LineChartBarData(
-            spots:
-                _weekData
-                    .asMap()
-                    .entries
-                    .map((e) => FlSpot(e.key.toDouble(), e.value['hours']))
-                    .toList(),
+            spots: _weekData
+                .asMap()
+                .entries
+                .map((e) => FlSpot(e.key.toDouble(), e.value['hours']))
+                .toList(),
             isCurved: true,
             color: chartColor,
             barWidth: 3,
@@ -750,11 +730,10 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
   }
 
   Widget _buildBarChart(ThemeData theme) {
-    final chartColor =
-        _selectedPlatform == 'All'
-            ? theme.colorScheme.primary
-            : _getPlatformByName(_selectedPlatform)['color'] as Color? ??
-                theme.colorScheme.primary;
+    final chartColor = _selectedPlatform == 'All'
+        ? theme.colorScheme.primary
+        : _getPlatformByName(_selectedPlatform)['color'] as Color? ??
+            theme.colorScheme.primary;
 
     return BarChart(
       BarChartData(
@@ -808,32 +787,30 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
         ),
         borderData: FlBorderData(show: false),
         minY: 0,
-        maxY:
-            _weekData
+        maxY: _weekData
                 .map((d) => d['hours'] as double)
                 .reduce((a, b) => a > b ? a : b) +
             1,
-        barGroups:
-            _weekData
-                .asMap()
-                .entries
-                .map(
-                  (e) => BarChartGroupData(
-                    x: e.key,
-                    barRods: [
-                      BarChartRodData(
-                        toY: e.value['hours'],
-                        color: chartColor,
-                        width: 20,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(6),
-                          topRight: Radius.circular(6),
-                        ),
-                      ),
-                    ],
+        barGroups: _weekData
+            .asMap()
+            .entries
+            .map(
+              (e) => BarChartGroupData(
+                x: e.key,
+                barRods: [
+                  BarChartRodData(
+                    toY: e.value['hours'],
+                    color: chartColor,
+                    width: 20,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(6),
+                      topRight: Radius.circular(6),
+                    ),
                   ),
-                )
-                .toList(),
+                ],
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -853,24 +830,23 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
 
       return PieChart(
         PieChartData(
-          sections:
-              _weekData
-                  .asMap()
-                  .entries
-                  .map(
-                    (e) => PieChartSectionData(
-                      value: e.value['hours'],
-                      title: '${e.value['day']}\n${e.value['hours']}h',
-                      color: colors[e.key % colors.length],
-                      radius: 100,
-                      titleStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  )
-                  .toList(),
+          sections: _weekData
+              .asMap()
+              .entries
+              .map(
+                (e) => PieChartSectionData(
+                  value: e.value['hours'],
+                  title: '${e.value['day']}\n${e.value['hours']}h',
+                  color: colors[e.key % colors.length],
+                  radius: 100,
+                  titleStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+              .toList(),
           sectionsSpace: 2,
           centerSpaceRadius: 40,
         ),
@@ -880,22 +856,21 @@ class _UsageAnalyticsState extends State<UsageAnalytics> {
     // Show platform comparison pie chart
     return PieChart(
       PieChartData(
-        sections:
-            _trackedPlatforms
-                .map(
-                  (platform) => PieChartSectionData(
-                    value: (platform['weeklyHours'] as num).toDouble(),
-                    title: '${platform['name']}\n${platform['weeklyHours']}h',
-                    color: platform['color'] as Color,
-                    radius: 100,
-                    titleStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-                .toList(),
+        sections: _trackedPlatforms
+            .map(
+              (platform) => PieChartSectionData(
+                value: (platform['weeklyHours'] as num).toDouble(),
+                title: '${platform['name']}\n${platform['weeklyHours']}h',
+                color: platform['color'] as Color,
+                radius: 100,
+                titleStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            )
+            .toList(),
         sectionsSpace: 2,
         centerSpaceRadius: 40,
       ),

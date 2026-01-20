@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,6 +15,7 @@ import '../../../utils/responsive_helper.dart';
 import '../../main_dashboard/widgets/dynamic_background_widget.dart';
 import '../../../services/theme_manager_service.dart';
 import '../../../services/firebase_auth_service.dart';
+import '../../tab_page/tab_page.dart';
 
 class SignInPage extends StatefulWidget {
   final String? logincheck;
@@ -371,7 +373,7 @@ class _SignInPageState extends State<SignInPage>
             getStorage.write('isFirstTime', true);
             Navigator.pushReplacementNamed(context, '/onboarding-flow');
           } else {
-            Navigator.pushReplacementNamed(context, '/main-dashboard');
+            Get.offAll(() => const TabPage());
           }
         }
       } else {

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
@@ -10,6 +11,8 @@ import '../../services/theme_manager_service.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/responsive_helper.dart';
+import '../auth/SIgnin/signin.dart';
+import '../tab_page/tab_page.dart';
 
 /// Splash Screen with logo animation
 /// Features subtle glitch effects and dynamic color theming
@@ -185,10 +188,10 @@ class _SplashScreenState extends State<SplashScreen>
     var IsLogin = getStorage.read('isLogin') ?? 0;
     if (IsLogin == 1) {
       // User is logged in, go to dashboard
-      Navigator.pushReplacementNamed(context, '/main-dashboard');
+      Get.offAll(() => const TabPage());
     } else {
       // User is not logged in, go to sign in screen
-      Navigator.pushReplacementNamed(context, '/signIn');
+      Get.offAll(() => const SignInPage());
     }
   }
 

@@ -14,6 +14,7 @@ import '../presentation/social_media_o_auth_connection/social_media_o_auth_conne
 import '../presentation/data_analytics_dashboard/data_analytics_dashboard.dart';
 import '../presentation/backend_infrastructure_monitor/backend_infrastructure_monitor.dart';
 import '../presentation/onboarding_flow/onboarding_flow.dart';
+import '../presentation/tab_page/tab_page.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -33,6 +34,7 @@ class AppRoutes {
   static const String dataAnalyticsDashboard = '/data-analytics-dashboard';
   static const String backendInfrastructureMonitor =
       '/backend-infrastructure-monitor';
+  static const String tabPage = '/tab-page';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SplashScreen(),
@@ -51,5 +53,6 @@ class AppRoutes {
     dataAnalyticsDashboard: (context) => const DataAnalyticsDashboard(),
     backendInfrastructureMonitor: (context) =>
         const BackendInfrastructureMonitor(),
+    tabPage: (context) => const TabPage(),
   };
 }

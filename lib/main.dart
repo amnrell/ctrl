@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -75,7 +76,7 @@ class _CtrlAppState extends State<CtrlApp> {
   Widget build(BuildContext context) {
     return Sizer(
       builder: (context, orientation, deviceType) {
-        return MaterialApp(
+        return GetMaterialApp(
           title: 'CTRL',
           debugShowCheckedModeBanner: false,
           theme: widget.themeManager.getCurrentTheme(),

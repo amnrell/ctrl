@@ -3,7 +3,6 @@ import 'package:sizer/sizer.dart';
 import 'dart:math';
 
 import '../../core/app_export.dart';
-import '../../widgets/custom_bottom_bar.dart';
 import '../../utils/responsive_helper.dart';
 import './widgets/ai_recommendation_banner_widget.dart';
 import './widgets/dynamic_background_widget.dart';
@@ -27,7 +26,8 @@ class _MainDashboardState extends State<MainDashboard>
     with SingleTickerProviderStateMixin {
   // Current vibe state
   String _currentVibe = 'Zen';
-  Color _currentVibeColor = AppTheme.primaryZen; // Default, will be loaded from ThemeManagerService
+  Color _currentVibeColor =
+      AppTheme.primaryZen; // Default, will be loaded from ThemeManagerService
 
   final ThemeManagerService _themeManager = ThemeManagerService();
   final Random _random = Random();
@@ -216,7 +216,6 @@ class _MainDashboardState extends State<MainDashboard>
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _buildAnimatedCtrlTitle(theme),
@@ -285,7 +284,8 @@ class _MainDashboardState extends State<MainDashboard>
                         if (_showAiRecommendation)
                           Padding(
                             padding: EdgeInsets.only(
-                              bottom: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0),
+                              bottom: ResponsiveHelper.getSpacing(context,
+                                  mobile: 2.0, tablet: 2.5, desktop: 3.0),
                             ),
                             child: AiRecommendationBannerWidget(
                               message: _aiRecommendationMessage,
@@ -306,11 +306,14 @@ class _MainDashboardState extends State<MainDashboard>
                           'Today\'s Usage',
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: theme.colorScheme.onSurface,
-                            fontSize: ResponsiveHelper.isDesktop(context) ? 28 : null,
+                            fontSize:
+                                ResponsiveHelper.isDesktop(context) ? 28 : null,
                           ),
                         ),
 
-                        SizedBox(height: ResponsiveHelper.getSpacing(context, mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
 
                         // Usage summary cards - responsive grid layout for web
                         ResponsiveHelper.isDesktop(context)
@@ -322,7 +325,8 @@ class _MainDashboardState extends State<MainDashboard>
                                       usageData: _usageData,
                                       vibeColor: _currentVibeColor,
                                       onTap: () {
-                                        Navigator.pushNamed(context, '/usage-analytics');
+                                        Navigator.pushNamed(
+                                            context, '/usage-analytics');
                                       },
                                     ),
                                   ),
@@ -332,7 +336,8 @@ class _MainDashboardState extends State<MainDashboard>
                                 usageData: _usageData,
                                 vibeColor: _currentVibeColor,
                                 onTap: () {
-                                  Navigator.pushNamed(context, '/usage-analytics');
+                                  Navigator.pushNamed(
+                                      context, '/usage-analytics');
                                 },
                               ),
                       ],
@@ -350,28 +355,17 @@ class _MainDashboardState extends State<MainDashboard>
               onPressed: _showVibeSelector,
               backgroundColor: _currentVibeColor,
               icon: CustomIconWidget(
-          iconName: 'psychology',
-          color: theme.colorScheme.surface,
-          size: 24,
-        ),
-        label: Text(
-          'Change Vibe',
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.surface,
-          ),
-        ),
-      ),
-      bottomNavigationBar: ResponsiveHelper.shouldShowBottomNav(context)
-          ? CustomBottomBar(
-              currentRoute: '/main-dashboard',
-              vibeColor: _currentVibeColor,
-              onNavigate: (route) {
-                if (route != '/main-dashboard') {
-                  Navigator.pushNamed(context, route);
-                }
-              },
-            )
-          : null,
+                iconName: 'psychology',
+                color: theme.colorScheme.surface,
+                size: 24,
+              ),
+              label: Text(
+                'Change Vibe',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.surface,
+                ),
+              ),
+            ),
     );
   }
 
@@ -511,11 +505,7 @@ class _VibeQuickSelector extends StatelessWidget {
     final theme = Theme.of(context);
 
     final vibes = [
-      {
-        'name': 'Zen',
-        'color': AppTheme.primaryZen,
-        'icon': 'self_improvement'
-      },
+      {'name': 'Zen', 'color': AppTheme.primaryZen, 'icon': 'self_improvement'},
       {'name': 'Energized', 'color': AppTheme.primaryEnergy, 'icon': 'bolt'},
       {
         'name': 'Reflective',
