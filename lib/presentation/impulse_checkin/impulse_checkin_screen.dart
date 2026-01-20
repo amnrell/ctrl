@@ -6,6 +6,7 @@ import '../../core/app_export.dart';
 import '../../services/theme_manager_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_icon_widget.dart';
+import '../main_dashboard/widgets/dynamic_background_widget.dart';
 
 /// Impulse Check-in Screen
 /// Allows users to log impulses with trigger type, intensity, mood, and context
@@ -16,7 +17,8 @@ class ImpulseCheckinScreen extends StatefulWidget {
   State<ImpulseCheckinScreen> createState() => _ImpulseCheckinScreenState();
 }
 
-class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen> {
+class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen>
+    with SingleTickerProviderStateMixin {
   final ThemeManagerService _themeManager = ThemeManagerService();
   final TextEditingController _notesController = TextEditingController();
 
@@ -24,6 +26,9 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen> {
   String? _selectedTrigger;
   double _intensity = 5.0;
   String? _selectedMood;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  Color _currentVibeColor = AppTheme.primaryZen;
 
   // Trigger options with icons
   final List<Map<String, dynamic>> _triggers = [
@@ -48,6 +53,33 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen> {
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    // Load current vibe color from theme manager
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _themeManager.initialize();
+      if (mounted) {
+        setState(() {
+          _currentVibeColor = _themeManager.primaryVibeColor;
+        });
+      }
+    });
+
+    // Listen to theme changes
+    _themeManager.addListener(() {
+      if (mounted) {
+        setState(() {
+          _currentVibeColor = _themeManager.primaryVibeColor;
+        });
+      }
+    });
     _initializeTheme();
   }
 
@@ -116,342 +148,352 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen> {
         variant: CustomAppBarVariant.withBack,
         vibeColor: _themeManager.primaryVibeColor,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header description
-              Container(
-                padding: EdgeInsets.all(3.w),
-                decoration: BoxDecoration(
-                  color: _themeManager.primaryVibeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color:
-                        _themeManager.primaryVibeColor.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    CustomIconWidget(
-                      iconName: 'info_outline',
-                      color: _themeManager.primaryVibeColor,
-                      size: 24,
-                    ),
-                    SizedBox(width: 3.w),
-                    Expanded(
-                      child: Text(
-                        'Log your impulse to build awareness and track patterns',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: DynamicBackgroundWidget(
+              primaryColor: _currentVibeColor,
+              secondaryColor: _themeManager.secondaryVibeColor,
+            ),
+          ),
+          SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header description
+                  Container(
+                    padding: EdgeInsets.all(3.w),
+                    decoration: BoxDecoration(
+                      color:
+                          _themeManager.primaryVibeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _themeManager.primaryVibeColor
+                            .withValues(alpha: 0.3),
+                        width: 1,
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 3.h),
-
-              // Section: What triggered the impulse?
-              Text(
-                'What triggered this impulse?',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-
-              SizedBox(height: 2.h),
-
-              // Trigger grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 3.w,
-                  mainAxisSpacing: 2.h,
-                  childAspectRatio: 2.5,
-                ),
-                itemCount: _triggers.length,
-                itemBuilder: (context, index) {
-                  final trigger = _triggers[index];
-                  final isSelected = _selectedTrigger == trigger['name'];
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedTrigger = trigger['name'];
-                      });
-                      HapticFeedback.selectionClick();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (trigger['color'] as Color).withValues(alpha: 0.2)
-                            : theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? (trigger['color'] as Color)
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomIconWidget(
-                            iconName: trigger['icon'],
-                            color: isSelected
-                                ? (trigger['color'] as Color)
-                                : theme.colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                          SizedBox(width: 2.w),
-                          Text(
-                            trigger['name'],
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isSelected
-                                  ? (trigger['color'] as Color)
-                                  : theme.colorScheme.onSurfaceVariant,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              SizedBox(height: 3.h),
-
-              // Section: Intensity Level
-              Text(
-                'Intensity Level',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-
-              SizedBox(height: 1.h),
-
-              // Intensity slider
-              Container(
-                padding: EdgeInsets.all(3.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Row(
                       children: [
-                        Text(
-                          'Mild',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
+                        CustomIconWidget(
+                          iconName: 'info_outline',
+                          color: _themeManager.primaryVibeColor,
+                          size: 24,
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 3.w,
-                            vertical: 1.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _themeManager.primaryVibeColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                        SizedBox(width: 3.w),
+                        Expanded(
                           child: Text(
-                            _intensity.toInt().toString(),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                            'Log your impulse to build awareness and track patterns',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface,
                             ),
-                          ),
-                        ),
-                        Text(
-                          'Intense',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
-                    SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: _themeManager.primaryVibeColor,
-                        inactiveTrackColor: _themeManager.primaryVibeColor
-                            .withValues(alpha: 0.2),
-                        thumbColor: _themeManager.primaryVibeColor,
-                        overlayColor: _themeManager.primaryVibeColor
-                            .withValues(alpha: 0.2),
-                        trackHeight: 6,
-                      ),
-                      child: Slider(
-                        value: _intensity,
-                        min: 1,
-                        max: 10,
-                        divisions: 9,
-                        onChanged: (value) {
+                  ),
+
+                  SizedBox(height: 3.h),
+
+                  // Section: What triggered the impulse?
+                  Text(
+                    'What triggered this impulse?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  SizedBox(height: 2.h),
+
+                  // Trigger grid
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 3.w,
+                      mainAxisSpacing: 2.h,
+                      childAspectRatio: 2.5,
+                    ),
+                    itemCount: _triggers.length,
+                    itemBuilder: (context, index) {
+                      final trigger = _triggers[index];
+                      final isSelected = _selectedTrigger == trigger['name'];
+
+                      return GestureDetector(
+                        onTap: () {
                           setState(() {
-                            _intensity = value;
+                            _selectedTrigger = trigger['name'];
                           });
                           HapticFeedback.selectionClick();
                         },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 3.h),
-
-              // Section: How are you feeling?
-              Text(
-                'How are you feeling?',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-
-              SizedBox(height: 2.h),
-
-              // Mood grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 3.w,
-                  mainAxisSpacing: 2.h,
-                  childAspectRatio: 1.8,
-                ),
-                itemCount: _moods.length,
-                itemBuilder: (context, index) {
-                  final mood = _moods[index];
-                  final isSelected = _selectedMood == mood['name'];
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedMood = mood['name'];
-                      });
-                      HapticFeedback.selectionClick();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (mood['color'] as Color).withValues(alpha: 0.2)
-                            : theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? (mood['color'] as Color)
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            mood['emoji'],
-                            style: TextStyle(fontSize: 24),
-                          ),
-                          SizedBox(height: 0.5.h),
-                          Text(
-                            mood['name'],
-                            style: theme.textTheme.bodySmall?.copyWith(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (trigger['color'] as Color)
+                                    .withValues(alpha: 0.2)
+                                : theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
                               color: isSelected
-                                  ? (mood['color'] as Color)
-                                  : theme.colorScheme.onSurfaceVariant,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                                  ? (trigger['color'] as Color)
+                                  : Colors.transparent,
+                              width: 2,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              SizedBox(height: 3.h),
-
-              // Section: What happened? (optional)
-              Text(
-                'What happened? (optional)',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-
-              SizedBox(height: 1.h),
-
-              // Notes text field
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  controller: _notesController,
-                  maxLines: 4,
-                  style: theme.textTheme.bodyMedium,
-                  decoration: InputDecoration(
-                    hintText: 'Describe what triggered this impulse...',
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant
-                          .withValues(alpha: 0.6),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(3.w),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomIconWidget(
+                                iconName: trigger['icon'],
+                                color: isSelected
+                                    ? (trigger['color'] as Color)
+                                    : theme.colorScheme.onSurfaceVariant,
+                                size: 20,
+                              ),
+                              SizedBox(width: 2.w),
+                              Text(
+                                trigger['name'],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: isSelected
+                                      ? (trigger['color'] as Color)
+                                      : theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ),
 
-              SizedBox(height: 4.h),
+                  SizedBox(height: 3.h),
 
-              // Log Impulse button
-              SizedBox(
-                width: double.infinity,
-                height: 6.h,
-                child: ElevatedButton(
-                  onPressed: _logImpulse,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _themeManager.primaryVibeColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
+                  // Section: Intensity Level
+                  Text(
+                    'Intensity Level',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  SizedBox(height: 1.h),
+
+                  // Intensity slider
+                  Container(
+                    padding: EdgeInsets.all(3.w),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  child: Text(
-                    'Log Impulse',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Mild',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 3.w,
+                                vertical: 1.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _themeManager.primaryVibeColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _intensity.toInt().toString(),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              'Intense',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SliderTheme(
+                          data: SliderThemeData(
+                            activeTrackColor: _themeManager.primaryVibeColor,
+                            inactiveTrackColor: _themeManager.primaryVibeColor
+                                .withValues(alpha: 0.2),
+                            thumbColor: _themeManager.primaryVibeColor,
+                            overlayColor: _themeManager.primaryVibeColor
+                                .withValues(alpha: 0.2),
+                            trackHeight: 6,
+                          ),
+                          child: Slider(
+                            value: _intensity,
+                            min: 1,
+                            max: 10,
+                            divisions: 9,
+                            onChanged: (value) {
+                              setState(() {
+                                _intensity = value;
+                              });
+                              HapticFeedback.selectionClick();
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
 
-              SizedBox(height: 2.h),
-            ],
+                  SizedBox(height: 3.h),
+
+                  // Section: How are you feeling?
+                  Text(
+                    'How are you feeling?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  SizedBox(height: 2.h),
+
+                  // Mood grid
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 1.2,
+                    ),
+                    itemCount: _moods.length,
+                    itemBuilder: (context, index) {
+                      final mood = _moods[index];
+                      final isSelected = _selectedMood == mood['name'];
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedMood = mood['name'];
+                          });
+                          HapticFeedback.selectionClick();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (mood['color'] as Color)
+                                    .withValues(alpha: 0.2)
+                                : theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? (mood['color'] as Color)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                mood['emoji'],
+                                style: TextStyle(fontSize: 24),
+                              ),
+                              SizedBox(height: 0.5.h),
+                              Text(
+                                mood['name'],
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isSelected
+                                      ? (mood['color'] as Color)
+                                      : theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  SizedBox(height: 3.h),
+
+                  // Section: What happened? (optional)
+                  Text(
+                    'What happened? (optional)',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  SizedBox(height: 1.h),
+
+                  // Notes text field
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      controller: _notesController,
+                      maxLines: 4,
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: 'Describe what triggered this impulse...',
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(3.w),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 4.h),
+
+                  // Log Impulse button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _logImpulse,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _themeManager.primaryVibeColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Log Impulse',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 2.h),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

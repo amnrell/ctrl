@@ -9,6 +9,7 @@ import './widgets/dynamic_background_widget.dart';
 import './widgets/greeting_header_widget.dart';
 import './widgets/usage_summary_card_widget.dart';
 import './widgets/vibe_indicator_card_widget.dart';
+import './widgets/day_streak_card_widget.dart';
 import '../../services/theme_manager_service.dart';
 import '../../models/vibe_config.dart';
 import '../../theme/app_theme.dart';
@@ -267,6 +268,17 @@ class _MainDashboardState extends State<MainDashboard>
 
                         SizedBox(height: ResponsiveHelper.getSpacing(context)),
 
+                        // Day Streak Card
+                        DayStreakCardWidget(
+                          currentStreak: 12,
+                          vibeColor: _currentVibeColor,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/weekly-summary');
+                          },
+                        ),
+
+                        SizedBox(height: ResponsiveHelper.getSpacing(context)),
+
                         // Vibe indicator card with emotional state
                         GestureDetector(
                           onTap: () {
@@ -340,6 +352,66 @@ class _MainDashboardState extends State<MainDashboard>
                                       context, '/usage-analytics');
                                 },
                               ),
+
+                        SizedBox(height: ResponsiveHelper.getSpacing(context)),
+
+                        // Quick Actions Section
+                        Text(
+                          'Quick Actions',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontSize:
+                                ResponsiveHelper.isDesktop(context) ? 28 : null,
+                          ),
+                        ),
+
+                        SizedBox(
+                            height: ResponsiveHelper.getSpacing(context,
+                                mobile: 2.0, tablet: 2.5, desktop: 3.0)),
+
+                        // Quick action cards grid
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 3.w,
+                          mainAxisSpacing: 2.h,
+                          childAspectRatio: 1.4,
+                          children: [
+                            _buildQuickActionCard(
+                              context,
+                              'Impulse Check-in',
+                              'Log your impulse',
+                              'visibility',
+                              Color(0xFFAB47BC),
+                              '/impulse-checkin',
+                            ),
+                            _buildQuickActionCard(
+                              context,
+                              'CTRL Journal',
+                              'Write your thoughts',
+                              'auto_stories',
+                              Color(0xFF42A5F5),
+                              '/ctrl-journal',
+                            ),
+                            _buildQuickActionCard(
+                              context,
+                              'Mood Check',
+                              'How are you feeling?',
+                              'mood',
+                              Color(0xFF66BB6A),
+                              '', // /mood-check
+                            ),
+                            _buildQuickActionCard(
+                              context,
+                              'Premium',
+                              'Unlock AI insights',
+                              'workspace_premium',
+                              Color(0xFFFFB300),
+                              '', // /premium-upgrade
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -485,6 +557,84 @@ class _MainDashboardState extends State<MainDashboard>
           });
           Navigator.pop(context);
         },
+      ),
+    );
+  }
+
+  /// Build quick action card
+  Widget _buildQuickActionCard(
+    BuildContext context,
+    String title,
+    String subtitle,
+    String icon,
+    Color color,
+    String route,
+  ) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, route);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color,
+              color.withValues(alpha: 0.7),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(3.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: CustomIconWidget(
+                  iconName: icon,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 0.5.h),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
