@@ -149,7 +149,6 @@ class _MoodCheckScreenState extends State<MoodCheckScreen>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(

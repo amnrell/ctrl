@@ -137,7 +137,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(

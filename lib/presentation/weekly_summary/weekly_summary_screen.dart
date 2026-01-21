@@ -92,7 +92,6 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(

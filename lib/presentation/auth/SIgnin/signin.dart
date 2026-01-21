@@ -94,7 +94,6 @@ class _SignInPageState extends State<SignInPage>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           // Main content

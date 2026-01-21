@@ -241,7 +241,6 @@ class _MainDashboardState extends State<MainDashboard>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
 

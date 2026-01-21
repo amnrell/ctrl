@@ -443,7 +443,6 @@ Remember: Awareness and education are the backbone, personalization is the drivi
             Positioned.fill(
               child: DynamicBackgroundWidget(
                 primaryColor: _themeManager.primaryVibeColor,
-                secondaryColor: _themeManager.secondaryVibeColor,
               ),
             ),
 

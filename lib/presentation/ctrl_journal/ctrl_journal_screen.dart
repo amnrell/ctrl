@@ -167,7 +167,6 @@ class _CtrlJournalScreenState extends State<CtrlJournalScreen>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(

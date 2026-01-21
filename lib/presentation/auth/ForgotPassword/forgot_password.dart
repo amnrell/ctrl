@@ -68,7 +68,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
   void dispose() {
     _pulseController.dispose();
     emailController.dispose();
-    _themeManager.removeListener(() {});
     super.dispose();
   }
 
@@ -85,7 +84,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(
@@ -142,7 +140,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _emailSent ? "Check Your Email" : "Forgot Password",
+                                _emailSent
+                                    ? "Check Your Email"
+                                    : "Forgot Password",
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontSize: ResponsiveHelper.isDesktop(context)
@@ -168,7 +168,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                               if (!_emailSent) ...[
                                 SizedBox(
                                     height: ResponsiveHelper.getSpacing(context,
-                                        mobile: 3.0, tablet: 3.5, desktop: 4.0)),
+                                        mobile: 3.0,
+                                        tablet: 3.5,
+                                        desktop: 4.0)),
                                 SizedBox(
                                   width: ResponsiveHelper.isDesktop(context)
                                       ? 600
@@ -199,24 +201,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 24, vertical: 12),
                                 color: primaryColor,
-                                onPressed: _isLoading ? null : _handlePasswordReset,
+                                onPressed:
+                                    _isLoading ? null : _handlePasswordReset,
                                 child: _isLoading
                                     ? SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
                                             theme.colorScheme.surface,
                                           ),
                                         ),
                                       )
                                     : Text(
                                         "Send Reset Link",
-                                        style: theme.textTheme.labelLarge?.copyWith(
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
                                           color: theme.colorScheme.surface,
                                           letterSpacing: 1.5,
-                                          fontSize: ResponsiveHelper.isDesktop(context)
+                                          fontSize: ResponsiveHelper.isDesktop(
+                                                  context)
                                               ? 18
                                               : 17,
                                         ),
@@ -250,8 +256,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                                         ResponsiveHelper.isDesktop(context)
                                             ? 16
                                             : 12.5,
-                                          decoration: TextDecoration.underline,
-                                          decorationColor: primaryColor,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: primaryColor,
                                     color: primaryColor,
                                     fontWeight: FontWeight.w600,
                                   ),

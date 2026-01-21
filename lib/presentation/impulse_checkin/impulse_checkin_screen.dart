@@ -157,7 +157,6 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen>
           Positioned.fill(
             child: DynamicBackgroundWidget(
               primaryColor: _currentVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
             ),
           ),
           SingleChildScrollView(

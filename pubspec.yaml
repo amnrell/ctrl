@@ -44,6 +44,7 @@ dependencies:
   firebase_core: ^4.3.0
   get: ^4.6.6
   get_storage: ^2.1.0
+  animated_background: ^2.0.0
 
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
