@@ -54,11 +54,13 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen>
   void initState() {
     super.initState();
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration:
+          const Duration(milliseconds: 3000), // Slower for smoother animation
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+    _pulseAnimation = Tween<double>(begin: 0.97, end: 1.03).animate(
+      // Subtler effect
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
@@ -92,7 +94,9 @@ class _ImpulseCheckinScreenState extends State<ImpulseCheckinScreen>
 
   @override
   void dispose() {
+    _pulseController.dispose();
     _notesController.dispose();
+    _themeManager.removeListener(() {});
     super.dispose();
   }
 

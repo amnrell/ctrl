@@ -433,242 +433,251 @@ Remember: Awareness and education are the backbone, personalization is the drivi
         variant: CustomAppBarVariant.withBack,
         vibeColor: _themeManager.primaryVibeColor,
       ),
-      body: Stack(
-        children: [
-          // Dynamic background
-          Positioned.fill(
-            child: DynamicBackgroundWidget(
-              primaryColor: _themeManager.primaryVibeColor,
-              secondaryColor: _themeManager.secondaryVibeColor,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          children: [
+            // Dynamic background
+            Positioned.fill(
+              child: DynamicBackgroundWidget(
+                primaryColor: _themeManager.primaryVibeColor,
+                secondaryColor: _themeManager.secondaryVibeColor,
+              ),
             ),
-          ),
 
-          // Main content
-          Column(
-            children: [
-              // AI Assistant Header
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: _themeManager.primaryVibeColor
-                      .withValues(alpha: 0.1), // Synced color
-                  border: Border(
-                    bottom: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 12.w,
-                      height: 12.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            _themeManager.primaryVibeColor, // Synced gradient
-                            _themeManager.primaryVibeColor
-                                .withValues(alpha: 0.7),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Center(
-                        child: CustomIconWidget(
-                          iconName: 'psychology',
-                          color: theme.colorScheme.onPrimary,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 3.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'CTRL AI Assistant',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          SizedBox(height: 0.5.h),
-                          Text(
-                            'Adaptive Emotional Intelligence',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          SizedBox(height: 0.5.h),
-                          Row(
-                            children: [
-                              Container(
-                                width: 2.w,
-                                height: 2.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _isOpenAIAvailable
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.error,
-                                ),
-                              ),
-                              SizedBox(width: 2.w),
-                              Text(
-                                _isOpenAIAvailable ? 'Online' : 'Limited Mode',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Messages List
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                  itemCount: _messages.length + (_isAiTyping ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (_isAiTyping && index == _messages.length) {
-                      return const AiTypingIndicatorWidget();
-                    }
-
-                    final message = _messages[index];
-                    return MessageBubbleWidget(
-                      message: message["message"] as String,
-                      isUser: message["sender"] == "user",
-                      timestamp: message["timestamp"] as DateTime,
-                      vibeColor: message["vibeColor"] as Color,
-                    );
-                  },
-                ),
-              ),
-
-              // Quick Response Chips
-              if (!_isRecording && !_isVoiceMode)
+            // Main content
+            Column(
+              children: [
+                // AI Assistant Header
                 Container(
                   width: double.infinity,
-                  height: 6.h,
-                  padding: EdgeInsets.symmetric(horizontal: 4.w),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _quickResponses.length,
-                    separatorBuilder: (context, index) => SizedBox(width: 2.w),
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: _themeManager.primaryVibeColor
+                        .withValues(alpha: 0.1), // Synced color
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12.w,
+                        height: 12.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              _themeManager.primaryVibeColor, // Synced gradient
+                              _themeManager.primaryVibeColor
+                                  .withValues(alpha: 0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Center(
+                          child: CustomIconWidget(
+                            iconName: 'psychology',
+                            color: theme.colorScheme.onPrimary,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 3.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'CTRL AI Assistant',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            SizedBox(height: 0.5.h),
+                            Text(
+                              'Adaptive Emotional Intelligence',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            SizedBox(height: 0.5.h),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 2.w,
+                                  height: 2.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _isOpenAIAvailable
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.error,
+                                  ),
+                                ),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  _isOpenAIAvailable
+                                      ? 'Online'
+                                      : 'Limited Mode',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Messages List
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                    itemCount: _messages.length + (_isAiTyping ? 1 : 0),
                     itemBuilder: (context, index) {
-                      return QuickResponseChipWidget(
-                        label: _quickResponses[index],
-                        onTap: () =>
-                            _handleQuickResponse(_quickResponses[index]),
+                      if (_isAiTyping && index == _messages.length) {
+                        return const AiTypingIndicatorWidget();
+                      }
+
+                      final message = _messages[index];
+                      return MessageBubbleWidget(
+                        message: message["message"] as String,
+                        isUser: message["sender"] == "user",
+                        timestamp: message["timestamp"] as DateTime,
+                        vibeColor: message["vibeColor"] as Color,
                       );
                     },
                   ),
                 ),
-
-              // Input Area with synced color
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  border: Border(
-                    top: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                      width: 1,
+                // Quick Response Chips
+                if (!_isRecording && !_isVoiceMode)
+                  Container(
+                    width: double.infinity,
+                    height: 6.h,
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _quickResponses.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(width: 2.w),
+                      itemBuilder: (context, index) {
+                        return QuickResponseChipWidget(
+                          label: _quickResponses[index],
+                          onTap: () =>
+                              _handleQuickResponse(_quickResponses[index]),
+                        );
+                      },
                     ),
                   ),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: _isVoiceMode
-                      ? VoiceRecordingWidget(
-                          isRecording: _isRecording,
-                          onStartRecording: _startRecording,
-                          onStopRecording: _stopRecording,
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                constraints: BoxConstraints(
-                                  minHeight: 6.h,
-                                  maxHeight: 15.h,
+                SizedBox(height: 1.h),
+                // Input Area with synced color
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: _isVoiceMode
+                        ? VoiceRecordingWidget(
+                            isRecording: _isRecording,
+                            onStartRecording: _startRecording,
+                            onStopRecording: _stopRecording,
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                    minHeight: 6.h,
+                                    maxHeight: 15.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme
+                                        .colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  child: TextField(
+                                    controller: _messageController,
+                                    maxLines: null,
+                                    textInputAction: TextInputAction.newline,
+                                    style: theme.textTheme.bodyMedium,
+                                    decoration: InputDecoration(
+                                      hintText: 'Type your message...',
+                                      hintStyle:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme
+                                            .colorScheme.onSurfaceVariant
+                                            .withValues(alpha: 0.6),
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4.w,
+                                        vertical: 1.5.h,
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                              ),
+                              SizedBox(width: 2.w),
+                              Container(
+                                width: 12.w,
+                                height: 12.w,
                                 decoration: BoxDecoration(
-                                  color:
-                                      theme.colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(24),
+                                  shape: BoxShape.circle,
+                                  color: _themeManager
+                                      .primaryVibeColor, // Synced button color
                                 ),
-                                child: TextField(
-                                  controller: _messageController,
-                                  maxLines: null,
-                                  textInputAction: TextInputAction.newline,
-                                  style: theme.textTheme.bodyMedium,
-                                  decoration: InputDecoration(
-                                    hintText: 'Type your message...',
-                                    hintStyle:
-                                        theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant
-                                          .withValues(alpha: 0.6),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                      vertical: 1.5.h,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 2.w),
-                            Container(
-                              width: 12.w,
-                              height: 12.w,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _themeManager
-                                    .primaryVibeColor, // Synced button color
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    if (_messageController.text
-                                        .trim()
-                                        .isNotEmpty) {
-                                      _sendMessage(_messageController.text);
-                                      HapticFeedback.lightImpact();
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Center(
-                                    child: CustomIconWidget(
-                                      iconName: 'send',
-                                      color: theme.colorScheme.onPrimary,
-                                      size: 20,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (_messageController.text
+                                          .trim()
+                                          .isNotEmpty) {
+                                        _sendMessage(_messageController.text);
+                                        HapticFeedback.lightImpact();
+                                      }
+                                    },
+                                    borderRadius: BorderRadius.circular(50),
+                                    child: Center(
+                                      child: CustomIconWidget(
+                                        iconName: 'send',
+                                        color: theme.colorScheme.onPrimary,
+                                        size: 20,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
