@@ -400,7 +400,7 @@ class _MainDashboardState extends State<MainDashboard>
                               'How are you feeling?',
                               'mood',
                               Color(0xFF66BB6A),
-                              '', // /mood-check
+                              '/mood-check',
                             ),
                             _buildQuickActionCard(
                               context,
@@ -408,7 +408,7 @@ class _MainDashboardState extends State<MainDashboard>
                               'Unlock AI insights',
                               'workspace_premium',
                               Color(0xFFFFB300),
-                              '', // /premium-upgrade
+                              '/premium-upgrade',
                             ),
                           ],
                         ),
