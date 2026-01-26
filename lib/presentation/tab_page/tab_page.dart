@@ -8,8 +8,8 @@ import '../../core/controllers/tab_controller.dart';
 import '../../services/theme_manager_service.dart';
 import '../main_dashboard/main_dashboard.dart';
 import '../ctrl_center/ctrl_center.dart';
+import '../profile/profile.dart';
 import '../usage_analytics/usage_analytics.dart';
-import '../settings_screen/settings_screen.dart';
 
 /// Main tab page with bottom navigation
 /// Implements the same structure as Mobile-Insights-by-Artigan
@@ -29,7 +29,7 @@ class _TabPageState extends State<TabPage> {
     const MainDashboard(),
     const CtrlCenter(),
     const UsageAnalytics(),
-    const SettingsScreen(),
+    const ProfilePage(), // SettingsScreen
   ];
 
   @override
