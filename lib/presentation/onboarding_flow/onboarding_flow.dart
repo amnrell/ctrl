@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/theme_manager_service.dart';
 import '../../theme/app_theme.dart';
@@ -32,24 +33,74 @@ class _OnboardingFlowState extends State<OnboardingFlow>
   @override
   void initState() {
     super.initState();
-    _controller = PageController();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
+
+    // Initialize theme manager
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _themeManager.initialize();
+      setState(() {
+        _currentVibeColor = _themeManager.primaryVibeColor;
+      });
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pageController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  void _next() {
-    if (_index < 2) {
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      Navigator.pushReplacementNamed(context, "/login");
+  void _onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+    _animationController.reset();
+    _animationController.forward();
+  }
+
+  Future<void> _completeOnboarding() async {
+    // Save onboarding completion and selected vibe
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    await prefs.setString('selected_vibe', _selectedVibe);
+
+    // Save vibe to theme manager
+    await _themeManager.setPrimaryVibeColor(
+      _currentVibeColor,
+      vibeName: _selectedVibe,
+    );
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/main-dashboard');
     }
+  }
+
+  Future<void> _skipOnboarding() async {
+    // Mark as completed but use default vibe
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/main-dashboard');
+    }
+  }
+
+  void _onVibeSelected(String vibe, Color color) {
+    setState(() {
+      _selectedVibe = vibe;
+      _currentVibeColor = color;
+    });
   }
 
   @override
