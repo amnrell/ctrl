@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../services/theme_manager_service.dart';
 import '../../services/data_compliance_service.dart';
+import '../../services/profile_preferences_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/constant.dart';
 import '../auth/SIgnin/signin.dart';
@@ -15,6 +16,13 @@ import '../main_dashboard/widgets/dynamic_background_widget.dart';
 import '../settings_screen/settings_screen.dart';
 import '../settings_screen/widgets/theme_customization_section_widget.dart';
 import '../settings_screen/widgets/font_customization_section_widget.dart';
+import 'widgets/regulation_layers_widget.dart';
+import 'widgets/vibe_mood_explanation_widget.dart';
+import 'widgets/regulation_style_widget.dart';
+import 'widgets/identity_settings_widget.dart';
+import 'widgets/personal_goals_widget.dart';
+import 'widgets/data_transparency_widget.dart';
+import 'widgets/premium_ai_learning_widget.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,8 +31,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with TickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage> {
   String selectedRoll = "",
       userName = "",
       email = "",
@@ -36,19 +43,20 @@ class _ProfilePageState extends State<ProfilePage>
   Color _currentVibeColor = AppTheme.primaryZen;
   final ThemeManagerService _themeManager = ThemeManagerService();
   final DataComplianceService _complianceService = DataComplianceService();
-  late TabController _tabController;
+  final ProfilePreferencesService _preferencesService =
+      ProfilePreferencesService();
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
 
     // Initialize services
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
         _themeManager.initialize(),
         _complianceService.initialize(),
+        _preferencesService.initialize(),
       ]);
       if (mounted) {
         setState(() {
@@ -70,7 +78,6 @@ class _ProfilePageState extends State<ProfilePage>
 
   @override
   void dispose() {
-    _tabController.dispose();
     _themeManager.removeListener(() {});
     super.dispose();
   }
@@ -90,6 +97,18 @@ class _ProfilePageState extends State<ProfilePage>
           "Profile",
           style: TextStyle(),
         ),
+        actions: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              Get.to(() => SettingsScreen());
+            },
+            child: Icon(
+              Icons.settings,
+              size: 21,
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -135,12 +154,13 @@ class _ProfilePageState extends State<ProfilePage>
                                         decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(50),
-                                            border: Border.all()),
+                                            border: Border.all(color: Colors.white)),
                                         child: const Padding(
                                           padding: EdgeInsets.all(5.0),
                                           child: Icon(
                                             Icons.edit,
                                             size: 20,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
@@ -151,7 +171,7 @@ class _ProfilePageState extends State<ProfilePage>
                                         right: 0.0, bottom: 10),
                                     child: Text(
                                       "Jonh Den",
-                                      style: const TextStyle(fontSize: 23),
+                                      style: const TextStyle(fontSize: 23,color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -161,11 +181,10 @@ class _ProfilePageState extends State<ProfilePage>
                         ),
                       ),
                       Positioned(
-                        top: 80,
+                        top: 60,
                         left: 25,
                         child: Container(
                           decoration: BoxDecoration(
-                              border: Border.all(width: 2),
                               borderRadius: BorderRadius.circular(1000)),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(100),
@@ -264,88 +283,11 @@ class _ProfilePageState extends State<ProfilePage>
                       ),
                     ],
                   ),
-                  SizedBox(height: phoneNo != "" ? 20 : 30),
-                  // Tab Bar
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.15),
-                      ),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        color: primaryColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      labelColor: primaryColor,
-                      unselectedLabelColor:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      labelStyle: theme.textTheme.labelMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                      unselectedLabelStyle: theme.textTheme.labelMedium,
-                      dividerColor: Colors.transparent,
-                      tabs: const [
-                        Tab(text: 'Layers'),
-                        Tab(text: 'Personalize'),
-                        Tab(text: 'Goals'),
-                        Tab(text: 'Data'),
-                      ],
-                    ),
-                  ),
+                  SizedBox(height: phoneNo != "" ? 20 : 20),
+                  // Profile Options List
+                  _buildProfileOptionsList(theme, primaryColor),
                   SizedBox(height: 2.h),
-                  // Tab View - Calculate height based on screen size
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: TabBarView(
-                      controller: _tabController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _buildLayersTab(theme),
-                        _buildPersonalizeTab(theme),
-                        _buildGoalsTab(theme),
-                        _buildDataTab(theme),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      Get.to(() => SettingsScreen());
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.settings,
-                                size: 18,
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                "Settings",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 13,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
                   CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: deleteAccountConfirmationDialog,
@@ -359,12 +301,14 @@ class _ProfilePageState extends State<ProfilePage>
                               Icon(
                                 Icons.delete_outline_outlined,
                                 size: 18,
+                                color: Colors.red,
                               ),
                               SizedBox(width: 10),
                               Text(
                                 "Delete Account",
                                 style: TextStyle(
                                   fontSize: 16,
+                                  color: Colors.red,
                                 ),
                               ),
                             ],
@@ -390,12 +334,14 @@ class _ProfilePageState extends State<ProfilePage>
                               Icon(
                                 Icons.logout,
                                 size: 18,
+                                 color: Colors.red,
                               ),
                               SizedBox(width: 10),
                               Text(
                                 "Log out",
                                 style: TextStyle(
                                   fontSize: 16,
+                                   color: Colors.red,
                                 ),
                               ),
                             ],
@@ -507,71 +453,423 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  Widget _buildLayersTab(ThemeData theme) {
-    if (!_isInitialized) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-        ],
+  Widget _buildProfileOptionsList(ThemeData theme, Color primaryColor) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.15),
+        ),
       ),
-    );
-  }
-
-  Widget _buildPersonalizeTab(ThemeData theme) {
-    if (!_isInitialized) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-         
-          SizedBox(height: 2.h),
-          ThemeCustomizationSectionWidget(
-            themeManager: _themeManager,
-            onThemeChanged: () => setState(() {}),
+          _buildProfileOptionItem(
+            context,
+            theme,
+            primaryColor,
+            'Regulation Layers',
+            'Control which regulation tools are active',
+            Icons.layers_outlined,
+            () => _showLayersBottomSheet(context),
           ),
-          SizedBox(height: 2.h),
-          FontCustomizationSectionWidget(
-            themeManager: _themeManager,
-            onFontChanged: () => setState(() {}),
+          _buildDivider(theme),
+          _buildProfileOptionItem(
+            context,
+            theme,
+            primaryColor,
+            'Personalize',
+            'Vibe themes, regulation style, and identity',
+            Icons.person_outline,
+            () => _showPersonalizeBottomSheet(context),
+          ),
+          _buildDivider(theme),
+          _buildProfileOptionItem(
+            context,
+            theme,
+            primaryColor,
+            'Personal Goals',
+            'Set and track your digital wellness goals',
+            Icons.flag_outlined,
+            () => _showGoalsBottomSheet(context),
+          ),
+          _buildDivider(theme),
+          _buildProfileOptionItem(
+            context,
+            theme,
+            primaryColor,
+            'Data & Privacy',
+            'Control your data and privacy settings',
+            Icons.shield_outlined,
+            () => _showDataBottomSheet(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGoalsTab(ThemeData theme) {
-    if (!_isInitialized) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-         
-        ],
+  Widget _buildProfileOptionItem(
+    BuildContext context,
+    ThemeData theme,
+    Color primaryColor,
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: primaryColor,
+                size: 24,
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 0.3.h),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 11.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDataTab(ThemeData theme) {
+  Widget _buildDivider(ThemeData theme) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      indent: 20.w,
+      color: theme.colorScheme.outline.withValues(alpha: 0.15),
+    );
+  }
+
+  void _showLayersBottomSheet(BuildContext context) {
     if (!_isInitialized) {
-      return Center(child: CircularProgressIndicator());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Loading...')),
+      );
+      return;
     }
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-      
-        ],
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 1.h),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Row(
+                children: [
+                  Text(
+                    'Regulation Layers',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: RegulationLayersWidget(
+                  preferencesService: _preferencesService,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPersonalizeBottomSheet(BuildContext context) {
+    if (!_isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Loading...')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.95,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 1.h),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Row(
+                children: [
+                  Text(
+                    'Personalize',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Column(
+                  children: [
+                    VibeMoodExplanationWidget(
+                      themeManager: _themeManager,
+                    ),
+                    SizedBox(height: 2.h),
+                    RegulationStyleWidget(
+                      preferencesService: _preferencesService,
+                    ),
+                    SizedBox(height: 2.h),
+                    IdentitySettingsWidget(
+                      preferencesService: _preferencesService,
+                    ),
+                    SizedBox(height: 2.h),
+                    PremiumAILearningWidget(
+                      preferencesService: _preferencesService,
+                    ),
+                    SizedBox(height: 2.h),
+                    ThemeCustomizationSectionWidget(
+                      themeManager: _themeManager,
+                      onThemeChanged: () => setState(() {}),
+                    ),
+                    SizedBox(height: 2.h),
+                    FontCustomizationSectionWidget(
+                      themeManager: _themeManager,
+                      onFontChanged: () => setState(() {}),
+                    ),
+                    SizedBox(height: 2.h),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGoalsBottomSheet(BuildContext context) {
+    if (!_isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Loading...')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 1.h),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Row(
+                children: [
+                  Text(
+                    'Personal Goals',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: PersonalGoalsWidget(
+                  preferencesService: _preferencesService,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDataBottomSheet(BuildContext context) {
+    if (!_isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Loading...')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 1.h),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Row(
+                children: [
+                  Text(
+                    'Data & Privacy',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: DataTransparencyWidget(
+                  complianceService: _complianceService,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
