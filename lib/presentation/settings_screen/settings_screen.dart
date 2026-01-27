@@ -173,7 +173,6 @@ class _SettingsScreenState extends State<SettingsScreen>
               unselectedLabelStyle: theme.textTheme.labelMedium,
               dividerColor: Colors.transparent,
               tabs: const [
-                Tab(text: 'Appearance'),
                 Tab(text: 'Notifications'),
                 Tab(text: 'Privacy'),
                 Tab(text: 'Wellbeing'),
@@ -185,10 +184,6 @@ class _SettingsScreenState extends State<SettingsScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _AppearanceTabContent(
-                  themeManager: _themeManager,
-                  onStateChanged: () => setState(() {}),
-                ),
                 _NotificationsTabContent(
                   notificationsEnabled: _notificationsEnabled,
                   vibeAlertsEnabled: _vibeAlertsEnabled,

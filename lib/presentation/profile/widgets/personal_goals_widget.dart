@@ -14,9 +14,13 @@ class PersonalGoalsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final goals = preferencesService.personalGoals;
 
-    return Column(
+    return ListenableBuilder(
+      listenable: preferencesService,
+      builder: (context, child) {
+        final goals = preferencesService.personalGoals;
+
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -53,6 +57,8 @@ class PersonalGoalsWidget extends StatelessWidget {
         else
           ...goals.map((goal) => _buildGoalCard(context, theme, goal)),
       ],
+    );
+      },
     );
   }
 

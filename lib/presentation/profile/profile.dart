@@ -23,6 +23,7 @@ import 'widgets/identity_settings_widget.dart';
 import 'widgets/personal_goals_widget.dart';
 import 'widgets/data_transparency_widget.dart';
 import 'widgets/premium_ai_learning_widget.dart';
+import 'edit_profile_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -50,14 +51,15 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-
-    // Initialize services
+    getUserData();
+    // Initialize services and load user data
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
         _themeManager.initialize(),
         _complianceService.initialize(),
         _preferencesService.initialize(),
       ]);
+
       if (mounted) {
         setState(() {
           _currentVibeColor = _themeManager.primaryVibeColor;
@@ -85,6 +87,18 @@ class _ProfilePageState extends State<ProfilePage> {
   String formatDate(String isoDate) {
     DateTime dateTime = DateTime.parse(isoDate);
     return DateFormat('dd MMM yyyy').format(dateTime);
+  }
+
+  getUserData() async {
+    final user = getStorage.read('user');
+    if (user != null) {
+      setState(() {
+        userName = user.displayName ?? '';
+        email = user.email ?? '';
+        phoneNo = user.phoneNumber ?? '';
+        userImage = user.photoURL ?? '';
+      });
+    }
   }
 
   @override
@@ -147,14 +161,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   GestureDetector(
-                                    onTap: () async {},
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const EditProfileScreen(),
+                                        ),
+                                      );
+                                    },
                                     child: Padding(
                                       padding: const EdgeInsets.only(top: 15.0),
                                       child: Container(
                                         decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(50),
-                                            border: Border.all(color: Colors.white)),
+                                            border: Border.all(
+                                                color: Colors.white)),
                                         child: const Padding(
                                           padding: EdgeInsets.all(5.0),
                                           child: Icon(
@@ -170,8 +193,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                     padding: const EdgeInsets.only(
                                         right: 0.0, bottom: 10),
                                     child: Text(
-                                      "Jonh Den",
-                                      style: const TextStyle(fontSize: 23,color: Colors.white),
+                                      userName.isNotEmpty
+                                          ? userName
+                                          : "John Doe",
+                                      style: const TextStyle(
+                                          fontSize: 17, color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -246,44 +272,46 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                           children: [
                             // ignore: unnecessary_null_comparison
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                const Icon(
-                                  Icons.phone,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  "+81 90-1234-5678",
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                            if (phoneNo.isNotEmpty)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Icon(
+                                    Icons.phone,
+                                    size: 18,
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                const Icon(
-                                  Icons.email_outlined,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  "jonh@gmail.com",
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    phoneNo,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            if (email.isNotEmpty)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Icon(
+                                    Icons.email_outlined,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    email,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: phoneNo != "" ? 20 : 20),
+                  SizedBox(height: phoneNo != "" ? 30 : 30),
                   // Profile Options List
                   _buildProfileOptionsList(theme, primaryColor),
                   SizedBox(height: 2.h),
@@ -334,14 +362,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               Icon(
                                 Icons.logout,
                                 size: 18,
-                                 color: Colors.red,
+                                color: Colors.red,
                               ),
                               SizedBox(width: 10),
                               Text(
                                 "Log out",
                                 style: TextStyle(
                                   fontSize: 16,
-                                   color: Colors.red,
+                                  color: Colors.red,
                                 ),
                               ),
                             ],
@@ -367,7 +395,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Alert !"),
+        title: const Text(
+          "Alert !",
+          style: TextStyle(color: Colors.red),
+        ),
         elevation: 5,
         titleTextStyle: const TextStyle(fontSize: 18),
         content: const Text("Are you sure want to logout?"),
@@ -407,7 +438,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Alert !"),
+        title: const Text(
+          "Alert !",
+          style: TextStyle(color: Colors.red),
+        ),
         elevation: 5,
         titleTextStyle: const TextStyle(fontSize: 18),
         content: const Text("Are you sure want to Delete\naccount?"),
@@ -454,57 +488,60 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileOptionsList(ThemeData theme, Color primaryColor) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4.w),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.15),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          _buildProfileOptionItem(
-            context,
-            theme,
-            primaryColor,
-            'Regulation Layers',
-            'Control which regulation tools are active',
-            Icons.layers_outlined,
-            () => _showLayersBottomSheet(context),
-          ),
-          _buildDivider(theme),
-          _buildProfileOptionItem(
-            context,
-            theme,
-            primaryColor,
-            'Personalize',
-            'Vibe themes, regulation style, and identity',
-            Icons.person_outline,
-            () => _showPersonalizeBottomSheet(context),
-          ),
-          _buildDivider(theme),
-          _buildProfileOptionItem(
-            context,
-            theme,
-            primaryColor,
-            'Personal Goals',
-            'Set and track your digital wellness goals',
-            Icons.flag_outlined,
-            () => _showGoalsBottomSheet(context),
-          ),
-          _buildDivider(theme),
-          _buildProfileOptionItem(
-            context,
-            theme,
-            primaryColor,
-            'Data & Privacy',
-            'Control your data and privacy settings',
-            Icons.shield_outlined,
-            () => _showDataBottomSheet(context),
-          ),
-        ],
+        child: Column(
+          children: [
+            _buildProfileOptionItem(
+              context,
+              theme,
+              primaryColor,
+              'Regulation Layers',
+              'Control which regulation tools are active',
+              Icons.layers_outlined,
+              () => _showLayersBottomSheet(context),
+            ),
+            _buildDivider(theme),
+            _buildProfileOptionItem(
+              context,
+              theme,
+              primaryColor,
+              'Personalize',
+              'Vibe themes, regulation style, and identity',
+              Icons.person_outline,
+              () => _showPersonalizeBottomSheet(context),
+            ),
+            _buildDivider(theme),
+            _buildProfileOptionItem(
+              context,
+              theme,
+              primaryColor,
+              'Personal Goals',
+              'Set and track your digital wellness goals',
+              Icons.flag_outlined,
+              () => _showGoalsBottomSheet(context),
+            ),
+            _buildDivider(theme),
+            _buildProfileOptionItem(
+              context,
+              theme,
+              primaryColor,
+              'Data & Privacy',
+              'Control your data and privacy settings',
+              Icons.shield_outlined,
+              () => _showDataBottomSheet(context),
+            ),
+          ],
+        ),
       ),
     );
   }

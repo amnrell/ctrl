@@ -14,8 +14,12 @@ class PremiumAILearningWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPremium = preferencesService.isPremium;
-    final aiEnabled = preferencesService.aiLearningEnabled;
+
+    return ListenableBuilder(
+      listenable: preferencesService,
+      builder: (context, child) {
+        final isPremium = preferencesService.isPremium;
+        final aiEnabled = preferencesService.aiLearningEnabled;
 
     return Container(
       padding: EdgeInsets.all(4.w),
@@ -147,6 +151,8 @@ class PremiumAILearningWidget extends StatelessWidget {
           ],
         ],
       ),
+    );
+      },
     );
   }
 

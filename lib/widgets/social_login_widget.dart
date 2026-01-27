@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../presentation/tab_page/tab_page.dart';
 import '../services/theme_manager_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/constant.dart';
@@ -98,6 +99,7 @@ class _SocialLoginPageState extends State<SocialLoginPage>
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       final User? user = userCredential.user;
+      getStorage.write('user',user);
 
       if (user == null) {
         throw Exception("Google login failed");
@@ -122,7 +124,7 @@ class _SocialLoginPageState extends State<SocialLoginPage>
           getStorage.write('isFirstTime', true);
           Navigator.pushReplacementNamed(context, '/onboarding-flow');
         } else {
-          Navigator.pushReplacementNamed(context, '/main-dashboard');
+          Get.offAll(() => const TabPage());
         }
       }
     } catch (e) {

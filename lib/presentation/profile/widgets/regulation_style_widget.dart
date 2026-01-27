@@ -14,7 +14,11 @@ class RegulationStyleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currentStyle = preferencesService.regulationStyle;
+    
+    return ListenableBuilder(
+      listenable: preferencesService,
+      builder: (context, child) {
+        final currentStyle = preferencesService.regulationStyle;
 
     return Container(
       padding: EdgeInsets.all(4.w),
@@ -86,6 +90,8 @@ class RegulationStyleWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

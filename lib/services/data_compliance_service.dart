@@ -121,24 +121,102 @@ class DataComplianceService {
         final bytes = utf8.encode(jsonData);
         final blob = html.Blob([bytes]);
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor =
-            html.AnchorElement(href: url)
-              ..setAttribute("download", fileName)
-              ..click();
+        html.AnchorElement(href: url)
+          ..setAttribute("download", fileName)
+          ..click();
         html.Url.revokeObjectUrl(url);
-      } else {
-        // Mobile download
+      } else if (Platform.isAndroid) {
+        // Android: Try to save to Downloads folder
+        Directory? downloadsDir;
+        
+        // Try primary Downloads path
+        final primaryPath = Directory('/storage/emulated/0/Download');
+        if (await primaryPath.exists()) {
+          downloadsDir = primaryPath;
+        } else {
+          // Try alternative paths
+          final altPaths = [
+            '/sdcard/Download',
+            '/storage/sdcard0/Download',
+          ];
+          for (final path in altPaths) {
+            final dir = Directory(path);
+            if (await dir.exists()) {
+              downloadsDir = dir;
+              break;
+            }
+          }
+        }
+        
+        // If Downloads directory found, use it
+        if (downloadsDir != null) {
+          final file = File('${downloadsDir.path}/$fileName');
+          await file.writeAsString(jsonData);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Data exported successfully to Downloads folder'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        } else {
+          // Fallback to external storage directory
+          final externalDir = await getExternalStorageDirectory();
+          if (externalDir != null) {
+            // Try to create Download folder in external storage
+            final downloadFolder = Directory('${externalDir.parent.path}/Download');
+            if (!await downloadFolder.exists()) {
+              await downloadFolder.create(recursive: true);
+            }
+            final file = File('${downloadFolder.path}/$fileName');
+            await file.writeAsString(jsonData);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Data exported to: ${file.path}'),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          } else {
+            // Last resort: use app documents directory
+            final appDir = await getApplicationDocumentsDirectory();
+            final file = File('${appDir.path}/$fileName');
+            await file.writeAsString(jsonData);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Data exported to: ${file.path}'),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          }
+        }
+      } else if (Platform.isIOS) {
+        // iOS: Save to app documents directory (can be accessed via Files app)
         final directory = await getApplicationDocumentsDirectory();
         final file = File('${directory.path}/$fileName');
         await file.writeAsString(jsonData);
-
-        // Show success message with file path
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data exported. Access via Files app > On My iPhone > CTRL'),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } else {
+        // Other platforms: use documents directory
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/$fileName');
+        await file.writeAsString(jsonData);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Data exported to: ${file.path}'),
-              duration: const Duration(seconds: 5),
-              action: SnackBarAction(label: 'OK', onPressed: () {}),
+              duration: const Duration(seconds: 3),
             ),
           );
         }

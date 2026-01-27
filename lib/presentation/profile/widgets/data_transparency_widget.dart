@@ -3,13 +3,37 @@ import 'package:sizer/sizer.dart';
 import '../../../services/data_compliance_service.dart';
 
 /// Widget for data transparency and privacy settings
-class DataTransparencyWidget extends StatelessWidget {
+class DataTransparencyWidget extends StatefulWidget {
   final DataComplianceService complianceService;
 
   const DataTransparencyWidget({
     super.key,
     required this.complianceService,
   });
+
+  @override
+  State<DataTransparencyWidget> createState() => _DataTransparencyWidgetState();
+}
+
+class _DataTransparencyWidgetState extends State<DataTransparencyWidget> {
+  Map<String, bool> _permissions = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPermissions();
+  }
+
+  Future<void> _loadPermissions() async {
+    final permissions = await widget.complianceService.getDataSharingPermissions();
+    if (mounted) {
+      setState(() {
+        _permissions = permissions;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,52 +109,35 @@ class DataTransparencyWidget extends StatelessWidget {
           Icons.person_outline,
           'personalization',
         ),
-        SizedBox(height: 2.h),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  await complianceService.exportUserData();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Data export initiated'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-                icon: Icon(Icons.download_outlined),
-                label: Text('Export My Data'),
-              ),
-            ),
-            SizedBox(width: 2.w),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  final confirmed = await complianceService.showDeleteConfirmationDialog(context);
-                  if (confirmed == true && context.mounted) {
-                    await complianceService.deleteAllUserData();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('All data deleted'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  }
-                },
-                icon: Icon(Icons.delete_outline),
-                label: Text('Delete All Data'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
-              ),
-            ),
-          ],
+        if (_isLoading)
+          Padding(
+            padding: EdgeInsets.all(4.w),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else
+          SizedBox(height: 2.h),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () async {
+              final success = await widget.complianceService.exportUserDataToFile(context);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success 
+                        ? 'Data exported successfully to Downloads folder'
+                        : 'Failed to export data. Please try again.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            icon: Icon(Icons.download_outlined),
+            label: Text('Export My Data'),
+          ),
+          
         ),
+          SizedBox(height: 5.h),
       ],
     );
   }
@@ -143,10 +150,7 @@ class DataTransparencyWidget extends StatelessWidget {
     IconData icon,
     String permissionKey,
   ) {
-    return FutureBuilder<Map<String, bool>>(
-      future: complianceService.getDataSharingPermissions(),
-      builder: (context, snapshot) {
-        final isEnabled = snapshot.data?[permissionKey] ?? true;
+    final isEnabled = _permissions[permissionKey] ?? true;
 
         return Container(
           padding: EdgeInsets.all(4.w),
@@ -184,7 +188,12 @@ class DataTransparencyWidget extends StatelessWidget {
               Switch(
                 value: isEnabled,
                 onChanged: (value) async {
-                  await complianceService.updateDataSharingPermission(
+                  // Update UI immediately
+                  setState(() {
+                    _permissions[permissionKey] = value;
+                  });
+                  // Save to service
+                  await widget.complianceService.updateDataSharingPermission(
                     permissionKey,
                     value,
                   );
@@ -201,8 +210,6 @@ class DataTransparencyWidget extends StatelessWidget {
             ],
           ),
         );
-      },
-    );
   }
 }
 

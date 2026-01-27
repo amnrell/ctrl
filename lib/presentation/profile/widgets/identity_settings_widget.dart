@@ -3,7 +3,7 @@ import 'package:sizer/sizer.dart';
 import '../../../services/profile_preferences_service.dart';
 
 /// Widget for identity settings and personalization
-class IdentitySettingsWidget extends StatelessWidget {
+class IdentitySettingsWidget extends StatefulWidget {
   final ProfilePreferencesService preferencesService;
 
   const IdentitySettingsWidget({
@@ -12,10 +12,37 @@ class IdentitySettingsWidget extends StatelessWidget {
   });
 
   @override
+  State<IdentitySettingsWidget> createState() => _IdentitySettingsWidgetState();
+}
+
+class _IdentitySettingsWidgetState extends State<IdentitySettingsWidget> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.preferencesService.userIdentity);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
+    return ListenableBuilder(
+      listenable: widget.preferencesService,
+      builder: (context, child) {
+        // Update controller if value changed externally
+        if (_controller.text != widget.preferencesService.userIdentity) {
+          _controller.text = widget.preferencesService.userIdentity;
+        }
+
+        return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -61,12 +88,10 @@ class IdentitySettingsWidget extends StatelessWidget {
               ),
             ),
             maxLines: 3,
+            controller: _controller,
             onChanged: (value) async {
-              await preferencesService.setUserIdentity(value);
+              await widget.preferencesService.setUserIdentity(value);
             },
-            controller: TextEditingController(
-              text: preferencesService.userIdentity,
-            ),
           ),
           SizedBox(height: 2.h),
           Container(
@@ -97,6 +122,8 @@ class IdentitySettingsWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }
